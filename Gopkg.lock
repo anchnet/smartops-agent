@@ -2,12 +2,43 @@
 
 
 [[projects]]
+  digest = "1:e92f5581902c345eb4ceffdcd4a854fb8f73cf436d47d837d1ec98ef1fe0a214"
+  name = "github.com/StackExchange/wmi"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5d049714c4a64225c3c79a7cf7d02f7fb5b96338"
+  version = "1.0.0"
+
+[[projects]]
+  digest = "1:440028f55cb322d8cb5b9d5ebec298a00b7d74690a658fe6b1c0c0b44341bfae"
+  name = "github.com/go-ole/go-ole"
+  packages = [
+    ".",
+    "oleutil",
+  ]
+  pruneopts = "UT"
+  revision = "97b6244175ae18ea6eef668034fd6565847501c9"
+  version = "v1.2.4"
+
+[[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  digest = "1:7da11b90176afd007076eedffbecf1fc56898ea8f84cd14a2fe9adde81fcde82"
+  name = "github.com/shirou/gopsutil"
+  packages = [
+    "cpu",
+    "internal/common",
+    "mem",
+  ]
+  pruneopts = "UT"
+  revision = "4c8b404ee5c53b04b04f34b1744a26bf5d2910de"
+  version = "v2.19.6"
 
 [[projects]]
   digest = "1:e096613fb7cf34743d49af87d197663cfccd61876e2219853005a57baedfa562"
@@ -25,9 +56,24 @@
   revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
   version = "v1.0.3"
 
+[[projects]]
+  branch = "master"
+  digest = "1:afb5346f71acefc3da7ad800f952cb2bcdb762194b05304bbf54d7f9490e31c5"
+  name = "golang.org/x/sys"
+  packages = [
+    "unix",
+    "windows",
+  ]
+  pruneopts = "UT"
+  revision = "04f50cda93cbb67f2afa353c52f342100e80e625"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/spf13/cobra"]
+  input-imports = [
+    "github.com/shirou/gopsutil/cpu",
+    "github.com/shirou/gopsutil/mem",
+    "github.com/spf13/cobra",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

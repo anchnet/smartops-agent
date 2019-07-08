@@ -1,9 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"capture/cmd/app"
+	"os"
 )
 
 func main() {
-	fmt.Println("Hello")
+	if err := app.CaptureCmd.Execute(); err != nil {
+		os.Exit(-1)
+	}
 }
