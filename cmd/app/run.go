@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/spf13/cobra"
+	"smart-capture/pkg/collector/check"
 	"smart-capture/pkg/collector/core"
 	"time"
 )
@@ -22,12 +23,15 @@ func run(cmd *cobra.Command, args []string) error {
 	}()
 	loader := core.GoCheckLoader{}
 	checkKeys := core.GetRegisteredFactoryKeys()
+	var allChecks []check.Check
+	for _, k := range checkKeys {
+		if checker, _ := loader.Load(k); checker != nil {
+			allChecks = append(allChecks, checker)
+		}
+	}
 	for {
-		for _, k := range checkKeys {
-			check, _ := loader.Load(k)
-			if check != nil {
-				_ = check.Run()
-			}
+		for _, c := range allChecks {
+			_ = c.Run()
 		}
 		time.Sleep(10 * time.Second)
 	}
