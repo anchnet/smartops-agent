@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"smart-capture/pkg/collector/check"
+	"smartdog-agent/pkg/collector/check"
 )
 
 type CheckFactory func() check.Check

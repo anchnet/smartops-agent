@@ -1,14 +1,10 @@
 package main
 
-import (
-	"fmt"
-	"github.com/shirou/gopsutil/cpu"
-)
+import "fmt"
 
 func main() {
-	info, _ := cpu.Info()
-
-	for _, i := range info {
-		fmt.Println(i.Cores)
-	}
+	j, k := 1, 2
+	j, k = k, j
+	l := float32(k) / float32(j)
+	fmt.Println("Result: ", j, k, l)
 }

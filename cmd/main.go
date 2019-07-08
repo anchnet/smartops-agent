@@ -2,8 +2,8 @@ package main
 
 import (
 	"os"
-	"smart-capture/cmd/app"
-	_ "smart-capture/pkg/collector/system"
+	"smartdog-agent/cmd/app"
+	_ "smartdog-agent/pkg/collector/system"
 )
 
 func main() {

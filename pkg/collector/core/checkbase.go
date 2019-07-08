@@ -1,7 +1,7 @@
 package core
 
 import (
-	"smart-capture/pkg/collector/defaults"
+	"smartdog-agent/pkg/collector/defaults"
 	"time"
 )
 

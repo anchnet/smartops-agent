@@ -2,8 +2,8 @@ package app
 
 import (
 	"github.com/spf13/cobra"
-	"smart-capture/pkg/collector/check"
-	"smart-capture/pkg/collector/core"
+	"smartdog-agent/pkg/collector/check"
+	"smartdog-agent/pkg/collector/core"
 	"time"
 )
 

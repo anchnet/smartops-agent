@@ -2,27 +2,27 @@ package system
 
 import (
 	"fmt"
-	"smart-capture/pkg/collector/check"
-	"smart-capture/pkg/collector/core"
+	"smartdog-agent/pkg/collector/check"
+	"smartdog-agent/pkg/collector/core"
 )
 
-const name = "memory"
+const memCheckName = "memory"
 
 type MemoryCheck struct {
 	core.CheckBase
 }
 
 func (c *MemoryCheck) Run() error {
-	fmt.Println(name)
+	fmt.Println(memCheckName)
 	return nil
 }
 
 func MemoryFactory() check.Check {
 	return &MemoryCheck{
-		CheckBase: core.NewCheckBase(name),
+		CheckBase: core.NewCheckBase(memCheckName),
 	}
 }
 
 func init() {
-	core.RegisterCheck(name, MemoryFactory)
+	core.RegisterCheck(memCheckName, MemoryFactory)
 }
