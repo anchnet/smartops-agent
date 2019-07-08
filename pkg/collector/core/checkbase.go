@@ -1,7 +1,7 @@
 package core
 
 import (
-	"smartdog-agent/pkg/collector/defaults"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/defaults"
 	"time"
 )
 

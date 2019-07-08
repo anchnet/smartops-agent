@@ -1,9 +1,9 @@
 package main
 
 import (
+	"gitlab.51idc.com/smartops/smartcat-agent/cmd/app"
+	_ "gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/system"
 	"os"
-	"smartdog-agent/cmd/app"
-	_ "smartdog-agent/pkg/collector/system"
 )
 
 func main() {

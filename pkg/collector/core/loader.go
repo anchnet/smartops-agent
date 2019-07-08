@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"smartdog-agent/pkg/collector/check"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
 )
 
 type CheckFactory func() check.Check

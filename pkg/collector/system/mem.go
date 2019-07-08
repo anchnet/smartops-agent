@@ -2,8 +2,8 @@ package system
 
 import (
 	"fmt"
-	"smartdog-agent/pkg/collector/check"
-	"smartdog-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
 )
 
 const memCheckName = "memory"

@@ -3,8 +3,8 @@ package system
 import (
 	"fmt"
 	"github.com/shirou/gopsutil/cpu"
-	"smartdog-agent/pkg/collector/check"
-	"smartdog-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
 	"time"
 )
 
