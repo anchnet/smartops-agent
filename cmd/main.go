@@ -1,8 +1,9 @@
 package main
 
 import (
-	"capture/cmd/app"
 	"os"
+	"smart-capture/cmd/app"
+	_ "smart-capture/pkg/collector/system"
 )
 
 func main() {

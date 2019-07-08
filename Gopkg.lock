@@ -29,12 +29,11 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:7da11b90176afd007076eedffbecf1fc56898ea8f84cd14a2fe9adde81fcde82"
+  digest = "1:837bcc36ea163378db223d7ade5c8eaa09b73e005874ea1d3e1ccf3ced2aad37"
   name = "github.com/shirou/gopsutil"
   packages = [
     "cpu",
     "internal/common",
-    "mem",
   ]
   pruneopts = "UT"
   revision = "4c8b404ee5c53b04b04f34b1744a26bf5d2910de"
@@ -72,7 +71,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/shirou/gopsutil/cpu",
-    "github.com/shirou/gopsutil/mem",
     "github.com/spf13/cobra",
   ]
   solver-name = "gps-cdcl"
