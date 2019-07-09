@@ -25,10 +25,10 @@ func (r *Runner) AddWorker() {
 
 func (r *Runner) work() {
 	fmt.Println("Ready to process checks...")
-	for check := range r.pending {
-		err := check.Run()
+	for c := range r.pending {
+		err := c.Run()
 		if err != nil {
-			fmt.Printf("Error running check %s: %s", check, err)
+			fmt.Printf("Error running c %s: %s", c, err)
 		}
 	}
 	fmt.Println("Finished processing checks.")

@@ -29,11 +29,12 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:837bcc36ea163378db223d7ade5c8eaa09b73e005874ea1d3e1ccf3ced2aad37"
+  digest = "1:7da11b90176afd007076eedffbecf1fc56898ea8f84cd14a2fe9adde81fcde82"
   name = "github.com/shirou/gopsutil"
   packages = [
     "cpu",
     "internal/common",
+    "mem",
   ]
   pruneopts = "UT"
   revision = "4c8b404ee5c53b04b04f34b1744a26bf5d2910de"
@@ -57,6 +58,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:7427036b6d926b3d1fa0773771820735b35554a98296f1074df440ee30a97296"
+  name = "golang.org/x/net"
+  packages = ["websocket"]
+  pruneopts = "UT"
+  revision = "da137c7871d730100384dbcf36e6f8fa493aef5b"
+
+[[projects]]
+  branch = "master"
   digest = "1:afb5346f71acefc3da7ad800f952cb2bcdb762194b05304bbf54d7f9490e31c5"
   name = "golang.org/x/sys"
   packages = [
@@ -71,7 +80,9 @@
   analyzer-version = 1
   input-imports = [
     "github.com/shirou/gopsutil/cpu",
+    "github.com/shirou/gopsutil/mem",
     "github.com/spf13/cobra",
+    "golang.org/x/net/websocket",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

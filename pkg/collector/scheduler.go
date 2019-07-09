@@ -9,7 +9,7 @@ import (
 type Scheduler struct {
 }
 
-func (s *Scheduler) Schedule(check check.Check) error {
+func (s *Scheduler) Schedule(check check.Check) {
 	ticker := time.NewTicker(check.Interval())
 	go func() {
 		fmt.Println("Scheduling check: ", check)
@@ -20,5 +20,4 @@ func (s *Scheduler) Schedule(check check.Check) error {
 			}
 		}
 	}()
-	return nil
 }

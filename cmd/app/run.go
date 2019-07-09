@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/sender"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,6 +34,10 @@ func run(cmd *cobra.Command, args []string) error {
 			fmt.Println("Received signal '%s', shutting down...", sig)
 			signalStop <- nil
 		}
+	}()
+	send := sender.GetSender()
+	go func() {
+		send.Run()
 	}()
 
 	checks := core.LoadChecks()
