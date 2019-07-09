@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
 	"time"
 )
@@ -21,19 +21,11 @@ func run(cmd *cobra.Command, args []string) error {
 	defer func() {
 		// Stop Collector
 	}()
-	loader := core.GoCheckLoader{}
-	checkKeys := core.GetRegisteredFactoryKeys()
-	var allChecks []check.Check
-	for _, k := range checkKeys {
-		if checker, _ := loader.Load(k); checker != nil {
-			allChecks = append(allChecks, checker)
-		}
+	checks := core.LoadChecks()
+	collector := collector.NewCollector()
+	for _, c := range checks {
+		collector.RunCheck(c)
 	}
-	for {
-		for _, c := range allChecks {
-			_ = c.Run()
-		}
-		time.Sleep(10 * time.Second)
-	}
+	time.Sleep(20 * time.Second)
 	return nil
 }

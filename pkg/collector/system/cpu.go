@@ -3,7 +3,6 @@ package system
 import (
 	"fmt"
 	"github.com/shirou/gopsutil/cpu"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
 	"time"
 )
@@ -18,6 +17,10 @@ type CPUCheck struct {
 	cores     int32
 	lastCycle float64
 	lastTimes cpu.TimesStat
+}
+
+func (c *CPUCheck) Interval() time.Duration {
+	return time.Duration(10 * time.Second)
 }
 
 func (c *CPUCheck) Run() error {
@@ -44,12 +47,8 @@ func (c *CPUCheck) Configure() {
 	panic("implement me")
 }
 
-func CPUFactory() check.Check {
-	return &CPUCheck{
-		CheckBase: core.NewCheckBase(cpuCheckName),
-	}
-}
-
 func init() {
-	core.RegisterCheck(cpuCheckName, CPUFactory)
+	core.RegisterCheck(cpuCheckName, &CPUCheck{
+		CheckBase: core.NewCheckBase(cpuCheckName),
+	})
 }

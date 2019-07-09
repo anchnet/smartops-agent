@@ -1,17 +1,14 @@
 package core
 
 import (
-	"fmt"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
 )
 
-type CheckFactory func() check.Check
-
 type GoCheckLoader struct{}
 
-var catalog = make(map[string]CheckFactory)
+var catalog = make(map[string]check.Check)
 
-func RegisterCheck(name string, c CheckFactory) {
+func RegisterCheck(name string, c check.Check) {
 	catalog[name] = c
 }
 
@@ -21,16 +18,14 @@ func GetRegisteredFactoryKeys() []string {
 	for name := range catalog {
 		factoryKeys = append(factoryKeys, name)
 	}
-
 	return factoryKeys
 }
 
 // Load returns a list of checks, one for every configuration instance found in `config`
-func (gl *GoCheckLoader) Load(name string) (check.Check, error) {
-	factory, found := catalog[name]
-	if !found {
-		msg := fmt.Sprintf("Check %s not found in Catalog", name)
-		return nil, fmt.Errorf(msg)
+func LoadChecks() []check.Check {
+	var checks []check.Check
+	for _, v := range catalog {
+		checks = append(checks, v)
 	}
-	return factory(), nil
+	return checks
 }
