@@ -16,7 +16,7 @@ func (s *Scheduler) Schedule(check check.Check) {
 		for {
 			select {
 			case <-ticker.C:
-				check.Run()
+				_ = check.Run()
 			}
 		}
 	}()

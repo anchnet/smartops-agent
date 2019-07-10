@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/config"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
 	"golang.org/x/net/websocket"
 )
 
 var (
-	wsurl  = "ws://localhost:8100/monitor"
-	origin = "http://localhost:8100/"
+	wsUrl  = config.Smartcat.GetString("ws_site")
+	origin = config.Smartcat.GetString("site_ori")
 )
 
 type Forward struct {
@@ -28,7 +29,7 @@ func NewForward() *Forward {
 
 func (w *Forward) connect() error {
 	var err error
-	w.wsInstance, err = websocket.Dial(wsurl, "", origin)
+	w.wsInstance, err = websocket.Dial(wsUrl, "", origin)
 	if err != nil {
 		return err
 	}

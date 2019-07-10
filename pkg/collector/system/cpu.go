@@ -19,10 +19,6 @@ type CPUCheck struct {
 	lastTimes cpu.TimesStat
 }
 
-func (c *CPUCheck) Interval() time.Duration {
-	return time.Duration(10 * time.Second)
-}
-
 func (c *CPUCheck) Run() error {
 	cpuTimes, _ := cpu.Times(false)
 	t := cpuTimes[0]

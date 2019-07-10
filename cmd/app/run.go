@@ -3,9 +3,11 @@ package app
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"gitlab.51idc.com/smartops/smartcat-agent/cmd/common"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/sender"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,11 +17,13 @@ func init() {
 	CaptureCmd.AddCommand(runCmd)
 }
 
-var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run collector",
-	RunE:  run,
-}
+var (
+	runCmd = &cobra.Command{
+		Use:   "run",
+		Short: "Run collector",
+		RunE:  run,
+	}
+)
 
 func run(cmd *cobra.Command, args []string) error {
 	defer func() {
@@ -31,19 +35,26 @@ func run(cmd *cobra.Command, args []string) error {
 	go func() {
 		select {
 		case sig := <-signalOS:
-			fmt.Println("Received signal '%s', shutting down...", sig)
+			log.Infof("Received signal '%s', shutting down...", sig)
 			signalStop <- nil
 		}
 	}()
+
+	if err := common.SetupConfig(confFilePath); err != nil {
+		log.Errorf("Failed to setup config %v", err)
+		return fmt.Errorf("ubable to set agent configuration: %v", err)
+	}
+
+	// setup the sender
 	send := sender.GetSender()
 	go func() {
 		send.Run()
 	}()
 
 	checks := core.LoadChecks()
-	collector := collector.NewCollector()
+	coll := collector.NewCollector()
 	for _, c := range checks {
-		collector.RunCheck(c)
+		coll.RunCheck(c)
 	}
 
 	select {
@@ -51,5 +62,4 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 
 	}
-	return nil
 }

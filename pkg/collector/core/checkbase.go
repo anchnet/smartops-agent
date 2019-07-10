@@ -17,3 +17,6 @@ func NewCheckBase(name string) CheckBase {
 		checkInterval: defaults.DefaultCheckInterval,
 	}
 }
+func (c *CheckBase) Interval() time.Duration {
+	return c.checkInterval
+}

@@ -1,5 +1,7 @@
 package metrics
 
+import "gitlab.51idc.com/smartops/smartcat-agent/pkg/config"
+
 type MetricSample struct {
 	Endpoint string
 	Metric   string
@@ -7,13 +9,17 @@ type MetricSample struct {
 	Tags     map[string]string
 }
 
-func NewMetricSample(metric string, value float64, tags map[string]string) *MetricSample {
+func newMetricSample(category string, metric string, value float64, tags map[string]string) *MetricSample {
 	return &MetricSample{
-		Endpoint: "111",
+		Endpoint: config.Smartcat.GetString("endpoint") + "_" + category,
 		Metric:   metric,
 		Value:    value,
 		Tags:     tags,
 	}
+}
+
+func NewServerMetricSample(metric string, value float64, tags map[string]string) *MetricSample {
+	return newMetricSample("server", metric, value, tags)
 }
 
 type SenderMetrics struct {
