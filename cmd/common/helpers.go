@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/config"
+	"github.com/anchnet/smartops-agent/pkg/config"
 	"strings"
 )
 

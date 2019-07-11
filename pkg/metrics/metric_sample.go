@@ -1,6 +1,6 @@
 package metrics
 
-import "gitlab.51idc.com/smartops/smartops-agent/pkg/config"
+import "github.com/anchnet/smartops-agent/pkg/config"
 
 type MetricSample struct {
 	Endpoint string

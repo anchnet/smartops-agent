@@ -1,10 +1,10 @@
 package system
 
 import (
+	"github.com/anchnet/smartops-agent/pkg/collector/defaults"
+	"github.com/anchnet/smartops-agent/pkg/metrics"
 	log "github.com/cihub/seelog"
 	"github.com/shirou/gopsutil/cpu"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/defaults"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/metrics"
 	"time"
 )
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gitlab.51idc.com/smartops/smartops-agent/cmd/app"
-	_ "gitlab.51idc.com/smartops/smartops-agent/pkg/collector/system"
+	"github.com/anchnet/smartops-agent/cmd/app"
+	_ "github.com/anchnet/smartops-agent/pkg/collector/system"
 	"os"
 )
 

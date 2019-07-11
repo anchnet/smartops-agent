@@ -1,7 +1,7 @@
 package core
 
 import (
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/check"
+	"github.com/anchnet/smartops-agent/pkg/collector/check"
 )
 
 type GoCheckLoader struct{}

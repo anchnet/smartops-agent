@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
+	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/spf13/cobra"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/config"
 	"os"
 )
 

@@ -2,13 +2,13 @@ package app
 
 import (
 	"fmt"
+	"github.com/anchnet/smartops-agent/cmd/common"
+	"github.com/anchnet/smartops-agent/pkg/collector"
+	"github.com/anchnet/smartops-agent/pkg/collector/core"
+	"github.com/anchnet/smartops-agent/pkg/config"
+	"github.com/anchnet/smartops-agent/pkg/sender"
 	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
-	"gitlab.51idc.com/smartops/smartops-agent/cmd/common"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/core"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/config"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/sender"
 	"os"
 	"os/signal"
 	"path/filepath"

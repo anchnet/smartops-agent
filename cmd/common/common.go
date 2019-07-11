@@ -1,7 +1,7 @@
 package common
 
 import (
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/util/executable"
+	"github.com/anchnet/smartops-agent/pkg/util/executable"
 )
 
 var (

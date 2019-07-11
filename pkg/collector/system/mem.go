@@ -2,8 +2,8 @@ package system
 
 import (
 	"fmt"
+	"github.com/anchnet/smartops-agent/pkg/metrics"
 	"github.com/shirou/gopsutil/mem"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/metrics"
 )
 
 const memCheckPrefix = checkPrefix + "mem."

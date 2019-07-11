@@ -1,8 +1,8 @@
 package collector
 
 import (
+	"github.com/anchnet/smartops-agent/pkg/collector/check"
 	log "github.com/cihub/seelog"
-	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/check"
 	"time"
 )
 
