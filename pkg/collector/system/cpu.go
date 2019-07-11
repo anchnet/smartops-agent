@@ -3,48 +3,43 @@ package system
 import (
 	log "github.com/cihub/seelog"
 	"github.com/shirou/gopsutil/cpu"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/defaults"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
 	"time"
 )
 
-const cpuCheckName = "cpu"
+const cpuCheckPrefix = checkPrefix + "cpu."
 
 type CPUCheck struct {
-	core.CheckBase
-	id        string
-	name      string
-	interval  time.Duration
-	cores     int32
+	SystemCheck
 	lastCycle float64
 	lastTimes cpu.TimesStat
 }
 
-func (c *CPUCheck) Run() error {
+func (c *CPUCheck) Run() ([]metrics.MetricSample, error) {
+	var samples = make([]metrics.MetricSample, 6)
 	cpuTimes, _ := cpu.Times(false)
 	t := cpuTimes[0]
-	cpuInfo, _ := cpu.Info()
-	c.cores = cpuInfo[0].Cores
-
-	cycle := t.Total() / float64(c.cores)
-
-	if c.lastCycle != 0 {
-		toPercent := 100 / (cycle - c.lastCycle)
-
-		user := ((t.User + t.Nice) - (c.lastTimes.User + c.lastTimes.Nice)) / float64(c.cores)
-
-		log.Infof("cpu.user: %v", user*toPercent)
+	if c.lastCycle == 0 {
+		c.lastTimes = t
+		c.lastCycle = t.Total()
+		time.Sleep(defaults.CheckInterval)
 	}
+	cycle := t.Total()
+	toPercent := 100 / (cycle - c.lastCycle)
+	user := ((t.User + t.Nice) - (c.lastTimes.User + c.lastTimes.Nice)) * toPercent
+	system := ((t.System + t.Irq + t.Softirq) - (c.lastTimes.System + c.lastTimes.Irq + c.lastTimes.Softirq)) * toPercent
+	iowait := (t.Iowait - c.lastTimes.Iowait) * toPercent
+	idle := (t.Idle - c.lastTimes.Idle) * toPercent
+	steal := (t.Steal - c.lastTimes.Steal) * toPercent
+	guest := (t.Guest - c.lastTimes.Guest) * toPercent
+
+	samples = append(samples, *metrics.NewServerMetricSample(cpuCheckPrefix+"user", user, nil))
+	samples = append(samples, *metrics.NewServerMetricSample(cpuCheckPrefix+"system", system, nil))
+	samples = append(samples, *metrics.NewServerMetricSample(cpuCheckPrefix+"iowait", iowait, nil))
+	samples = append(samples, *metrics.NewServerMetricSample(cpuCheckPrefix+"idle", idle, nil))
+	samples = append(samples, *metrics.NewServerMetricSample(cpuCheckPrefix+"steal", steal, nil))
+	samples = append(samples, *metrics.NewServerMetricSample(cpuCheckPrefix+"guest", guest, nil))
 	c.lastCycle = cycle
-	c.lastTimes = t
-	return nil
-}
-
-func (c *CPUCheck) Configure() {
-	panic("implement me")
-}
-
-func init() {
-	core.RegisterCheck(cpuCheckName, &CPUCheck{
-		CheckBase: core.NewCheckBase(cpuCheckName),
-	})
+	return samples, nil
 }

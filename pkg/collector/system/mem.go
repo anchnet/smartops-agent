@@ -1,36 +1,26 @@
 package system
 
 import (
+	"fmt"
 	"github.com/shirou/gopsutil/mem"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/sender"
 )
 
-const memCheckName = "memory"
-
-var virtualMemory = mem.VirtualMemory
+const memCheckPrefix = checkPrefix + "mem."
 
 type MemoryCheck struct {
-	core.CheckBase
+	SystemCheck
 }
 
-func (c *MemoryCheck) Run() error {
-	var metricSamples []*metrics.MetricSample
-	senderInstance := sender.GetSender()
-	v, errVirt := virtualMemory()
-	if errVirt == nil {
-		metricSamples = append(metricSamples, metrics.NewServerMetricSample("system.mem.total", float64(v.Total), nil))
-		metricSamples = append(metricSamples, metrics.NewServerMetricSample("system.mem.free", float64(v.Free), nil))
-		metricSamples = append(metricSamples, metrics.NewServerMetricSample("system.mem.used", float64(v.Used), nil))
+func (c *MemoryCheck) Run() ([]metrics.MetricSample, error) {
+	var samples = make([]metrics.MetricSample, 3)
+	v, err := mem.VirtualMemory()
+	if err != nil {
+		fmt.Println("...")
+		return nil, err
 	}
-
-	senderInstance.Commit(metrics.NewSenderMetrics(metricSamples))
-	return nil
-}
-
-func init() {
-	core.RegisterCheck(memCheckName, &MemoryCheck{
-		CheckBase: core.NewCheckBase(memCheckName),
-	})
+	samples = append(samples, *metrics.NewServerMetricSample(memCheckPrefix+"total", float64(v.Total), nil))
+	samples = append(samples, *metrics.NewServerMetricSample(memCheckPrefix+"free", float64(v.Free), nil))
+	samples = append(samples, *metrics.NewServerMetricSample(memCheckPrefix+"used", float64(v.Used), nil))
+	return samples, nil
 }

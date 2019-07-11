@@ -1,24 +1,23 @@
 package core
 
 import (
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/defaults"
 	"time"
 )
 
 type CheckBase struct {
-	checkName      string
-	latestWarnings []error
-	checkInterval  time.Duration
+	name     string
+	interval time.Duration
 }
 
-func NewCheckBase(name string) CheckBase {
+func NewCheckBase(name string, interval time.Duration) CheckBase {
 	return CheckBase{
-		checkName:     name,
-		checkInterval: defaults.DefaultCheckInterval,
+		name:     name,
+		interval: interval,
 	}
 }
-func (c *CheckBase) Interval() time.Duration {
-	return c.checkInterval
+
+func (cb *CheckBase) Interval() time.Duration {
+	return cb.interval
 }
 func (c *CheckBase) String() string {
 	return c.checkName

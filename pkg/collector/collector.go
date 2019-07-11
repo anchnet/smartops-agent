@@ -1,22 +1,23 @@
 package collector
 
-import "gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
+import (
+	"fmt"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/defaults"
+	"time"
+)
 
-type Collector struct {
-	scheduler *Scheduler
-	runner    *Runner
-	checks    map[string]check.Check
-}
+var checks = core.LoadChecks()
 
-func NewCollector() *Collector {
-	run := NewRunner()
-	c := &Collector{
-		runner: run,
-		checks: make(map[string]check.Check),
-	}
-	return c
-}
-
-func (c *Collector) RunCheck(check check.Check) {
-	c.scheduler.Schedule(check)
+func Collect() {
+	ticker := time.NewTicker(defaults.CheckInterval)
+	go func() {
+		fmt.Println("Scheduling check: ", nil)
+		for {
+			select {
+			case <-ticker.C:
+				//check.Run()
+			}
+		}
+	}()
 }

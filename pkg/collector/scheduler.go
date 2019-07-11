@@ -6,10 +6,7 @@ import (
 	"time"
 )
 
-type Scheduler struct {
-}
-
-func (s *Scheduler) Schedule(check check.Check) {
+func Schedule(check check.Check) {
 	ticker := time.NewTicker(check.Interval())
 	go func() {
 		log.Infof("Scheduling check %s with an interval of %v", check.String(), check.Interval())

@@ -5,5 +5,5 @@ import (
 )
 
 const (
-	DefaultCheckInterval time.Duration = 10 * time.Second
+	CheckInterval time.Duration = 10 * time.Second
 )
