@@ -1,7 +1,6 @@
 package system
 
 import (
-	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/collector/defaults"
 )
@@ -14,6 +13,7 @@ type SystemCheck struct {
 
 func (SystemCheck) Run() error {
 	//cpuMetrics =
+	return nil
 }
 
 func init() {

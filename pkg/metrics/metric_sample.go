@@ -11,7 +11,7 @@ type MetricSample struct {
 
 func newMetricSample(category string, metric string, value float64, tags map[string]string) *MetricSample {
 	return &MetricSample{
-		Endpoint: config.Smartcat.GetString("endpoint") + "_" + category,
+		Endpoint: config.SmartOps.GetString("endpoint") + "_" + category,
 		Metric:   metric,
 		Value:    value,
 		Tags:     tags,

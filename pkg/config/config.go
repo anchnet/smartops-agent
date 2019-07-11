@@ -12,16 +12,16 @@ const defaultSiteOri = "http://" + defaultDomain + "/"
 
 var overrideVars = map[string]interface{}{}
 
-//SmartCat is the global configuration object
+//SmartOps is the global configuration object
 var (
-	Smartcat Config
+	SmartOps Config
 )
 
 func init() {
-	// Configure Smartcat global configuration
-	Smartcat = NewConfig("smartcat", "SC", strings.NewReplacer(".", "_"))
+	// Configure SmartOps global configuration
+	SmartOps = NewConfig("smartops", "SC", strings.NewReplacer(".", "_"))
 	// Configuration defaults
-	initConfig(Smartcat)
+	initConfig(SmartOps)
 }
 
 // initConfig initializes the config defaults on a config

@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// DefaultConfPath points to the folder containing smartcat.yaml
+	// DefaultConfPath points to the folder containing smartops.yaml
 	DefaultConfPath = "/etc/datadog-agent"
 	// DefaultLogFile points to the log file that will be used if not configured
 	DefaultLogFile = "/var/log/datadog/agent.log"

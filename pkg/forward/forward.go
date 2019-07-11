@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	wsUrl  = config.Smartcat.GetString("ws_site")
-	origin = config.Smartcat.GetString("site_ori")
+	wsUrl  = config.SmartOps.GetString("ws_site")
+	origin = config.SmartOps.GetString("site_ori")
 )
 
 type Forward struct {

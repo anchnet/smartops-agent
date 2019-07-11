@@ -18,5 +18,5 @@ var (
 const loggerName config.LoggerName = "CORE"
 
 func init() {
-	Command.PersistentFlags().StringVarP(&confFilePath, "cfgpath", "c", "", "path to directory containing smartcat.yaml")
+	Command.PersistentFlags().StringVarP(&confFilePath, "cfgpath", "c", "", "path to directory containing smartops.yaml")
 }

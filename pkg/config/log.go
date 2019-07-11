@@ -44,7 +44,7 @@ func SetupLogger(loggerName LoggerName, logLevel, logFile string, logToConsole, 
 		configTemplate += `<console />`
 	}
 	if logFile != "" {
-		configTemplate += fmt.Sprintf(`<rollingfile type="size" filename="%s" maxsize="%d" maxrolls="%d" />`, logFile, Smartcat.GetSizeInBytes("log_file_max_size"), Smartcat.GetInt("log_file_max_rolls"))
+		configTemplate += fmt.Sprintf(`<rollingfile type="size" filename="%s" maxsize="%d" maxrolls="%d" />`, logFile, SmartOps.GetSizeInBytes("log_file_max_size"), SmartOps.GetInt("log_file_max_rolls"))
 	}
 	configTemplate += fmt.Sprintf(`</outputs>
 	<formats>

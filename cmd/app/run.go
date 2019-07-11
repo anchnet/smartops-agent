@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/collector"
-	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/sender"
 	log "github.com/cihub/seelog"
@@ -57,7 +56,7 @@ func startAgent() error {
 		log.Errorf("Failed to setup config %v", err)
 		return fmt.Errorf("ubable to set agent configuration: %v", err)
 	}
-	logFile := config.Smartcat.GetString("log_file")
+	logFile := config.SmartOps.GetString("log_file")
 	if logFile == "" {
 		logFile = common.DefaultLogFile
 	}
@@ -68,34 +67,30 @@ func startAgent() error {
 		}
 	}
 
-	if config.Smartcat.GetBool("disable_file_logging") {
+	if config.SmartOps.GetBool("disable_file_logging") {
 		// this will prevent any logging on file
 		logFile = ""
 	}
 
 	err := config.SetupLogger(
 		loggerName,
-		config.Smartcat.GetString("log_level"),
+		config.SmartOps.GetString("log_level"),
 		logFile,
-		config.Smartcat.GetBool("log_to_console"),
-		config.Smartcat.GetBool("log_format_json"),
+		config.SmartOps.GetBool("log_to_console"),
+		config.SmartOps.GetBool("log_format_json"),
 	)
 	if err != nil {
 		return fmt.Errorf("Error while setting up logging, exiting: %v", err)
 	}
 
-	log.Info("Starting Smartcat Agent...")
+	log.Info("Starting SmartOps Agent...")
 
 	// setup the sender
 	send := sender.GetSender()
 	go func() {
 		send.Run()
 	}()
-
-	checks := core.LoadChecks()
-	coll := collector.NewCollector()
-	for _, c := range checks {
-		coll.RunCheck(c)
-	}
+	log.Info("Start running...")
+	collector.Collect()
 	return nil
 }

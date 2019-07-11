@@ -20,5 +20,5 @@ func (cb *CheckBase) Interval() time.Duration {
 	return cb.interval
 }
 func (c *CheckBase) String() string {
-	return c.checkName
+	return c.name
 }
