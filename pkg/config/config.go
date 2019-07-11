@@ -1,7 +1,8 @@
 package config
 
 import (
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
+	//"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
+	log "github.com/cihub/seelog"
 	"strings"
 )
 
@@ -30,6 +31,13 @@ func initConfig(config Config) {
 	config.SetDefault("ws_site", defaultWsSite)
 	config.SetDefault("site_ori", defaultSiteOri)
 	config.BindEnvAndSetDefault("endpoint", nil)
+
+	// Log
+	config.BindEnvAndSetDefault("log_file_max_size", "10Mb")
+	config.BindEnvAndSetDefault("log_file_max_rolls", 1)
+	config.BindEnvAndSetDefault("log_level", "info")
+	config.BindEnvAndSetDefault("log_to_console", true)
+	config.BindEnvAndSetDefault("log_format_json", false)
 }
 
 func findUnknownKeys(config Config) []string {

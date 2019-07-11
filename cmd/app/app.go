@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/config"
 	"os"
 )
 
@@ -13,6 +14,8 @@ var (
 	}
 	confFilePath string
 )
+
+const loggerName config.LoggerName = "CORE"
 
 func init() {
 	CaptureCmd.PersistentFlags().StringVarP(&confFilePath, "cfgpath", "c", "", "path to directory containing smartcat.yaml")

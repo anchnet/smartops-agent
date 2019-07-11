@@ -1,7 +1,7 @@
 package collector
 
 import (
-	"fmt"
+	log "github.com/cihub/seelog"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
 )
 
@@ -24,12 +24,12 @@ func (r *Runner) AddWorker() {
 }
 
 func (r *Runner) work() {
-	fmt.Println("Ready to process checks...")
+	log.Info("Ready to process checks...")
 	for c := range r.pending {
 		err := c.Run()
 		if err != nil {
-			fmt.Printf("Error running c %s: %s", c, err)
+			log.Errorf("Error running c %s: %s", c, err)
 		}
 	}
-	fmt.Println("Finished processing checks.")
+	log.Info("Finished processing checks.")
 }

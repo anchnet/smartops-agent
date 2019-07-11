@@ -2,14 +2,16 @@ package app
 
 import (
 	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
 	"gitlab.51idc.com/smartops/smartcat-agent/cmd/common"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartcat-agent/pkg/config"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/sender"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 )
 
@@ -40,10 +42,49 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}()
 
+	if err := startAgent(); err != nil {
+		return err
+	}
+
+	select {
+	case err := <-signalStop:
+		return err
+
+	}
+}
+func startAgent() error {
 	if err := common.SetupConfig(confFilePath); err != nil {
 		log.Errorf("Failed to setup config %v", err)
 		return fmt.Errorf("ubable to set agent configuration: %v", err)
 	}
+	logFile := config.Smartcat.GetString("log_file")
+	if logFile == "" {
+		logFile = common.DefaultLogFile
+	}
+	logFileDir := filepath.Dir(logFile)
+	if _, err := os.Stat(logFileDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(logFileDir, os.ModePerm); err != nil {
+			return fmt.Errorf("failed to create log dir: %v", err)
+		}
+	}
+
+	if config.Smartcat.GetBool("disable_file_logging") {
+		// this will prevent any logging on file
+		logFile = ""
+	}
+
+	err := config.SetupLogger(
+		loggerName,
+		config.Smartcat.GetString("log_level"),
+		logFile,
+		config.Smartcat.GetBool("log_to_console"),
+		config.Smartcat.GetBool("log_format_json"),
+	)
+	if err != nil {
+		return fmt.Errorf("Error while setting up logging, exiting: %v", err)
+	}
+
+	log.Info("Starting Smartcat Agent...")
 
 	// setup the sender
 	send := sender.GetSender()
@@ -56,10 +97,5 @@ func run(cmd *cobra.Command, args []string) error {
 	for _, c := range checks {
 		coll.RunCheck(c)
 	}
-
-	select {
-	case err := <-signalStop:
-		return err
-
-	}
+	return nil
 }

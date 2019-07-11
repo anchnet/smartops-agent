@@ -20,3 +20,6 @@ func NewCheckBase(name string) CheckBase {
 func (c *CheckBase) Interval() time.Duration {
 	return c.checkInterval
 }
+func (c *CheckBase) String() string {
+	return c.checkName
+}

@@ -1,7 +1,7 @@
 package system
 
 import (
-	"fmt"
+	log "github.com/cihub/seelog"
 	"github.com/shirou/gopsutil/cpu"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
 	"time"
@@ -32,7 +32,7 @@ func (c *CPUCheck) Run() error {
 
 		user := ((t.User + t.Nice) - (c.lastTimes.User + c.lastTimes.Nice)) / float64(c.cores)
 
-		fmt.Println("cpu.user: ", user*toPercent)
+		log.Infof("cpu.user: %v", user*toPercent)
 	}
 	c.lastCycle = cycle
 	c.lastTimes = t

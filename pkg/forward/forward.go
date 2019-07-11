@@ -3,9 +3,10 @@ package forward
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/config"
 	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
+	//"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
+	log "github.com/cihub/seelog"
 	"golang.org/x/net/websocket"
 )
 
@@ -40,5 +41,5 @@ func (w *Forward) Send(metrics metrics.SenderMetrics) {
 	buffer := new(bytes.Buffer)
 	_ = json.NewEncoder(buffer).Encode(metrics)
 	_, _ = w.wsInstance.Write(buffer.Bytes())
-	fmt.Println("Send success")
+	log.Infof("Successfully posted payload")
 }
