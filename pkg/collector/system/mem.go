@@ -3,7 +3,7 @@ package system
 import (
 	"fmt"
 	"github.com/shirou/gopsutil/mem"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/metrics"
 )
 
 const memCheckPrefix = checkPrefix + "mem."

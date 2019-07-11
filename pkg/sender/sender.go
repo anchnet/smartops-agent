@@ -1,8 +1,8 @@
 package sender
 
 import (
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/forward"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/forward"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/metrics"
 )
 
 var (

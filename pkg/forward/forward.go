@@ -3,9 +3,9 @@ package forward
 import (
 	"bytes"
 	"encoding/json"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/config"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
-	//"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/config"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/metrics"
+	//"gitlab.51idc.com/smartops/smartops-agent/pkg/util/log"
 	log "github.com/cihub/seelog"
 	"golang.org/x/net/websocket"
 )

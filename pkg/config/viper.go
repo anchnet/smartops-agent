@@ -1,7 +1,7 @@
 package config
 
 import (
-	//"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
+	//"gitlab.51idc.com/smartops/smartops-agent/pkg/util/log"
 	log "github.com/cihub/seelog"
 	"io"
 	"strings"

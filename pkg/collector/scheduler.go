@@ -2,7 +2,7 @@ package collector
 
 import (
 	log "github.com/cihub/seelog"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/check"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/check"
 	"time"
 )
 

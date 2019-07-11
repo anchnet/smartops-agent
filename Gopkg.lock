@@ -158,14 +158,6 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:11118bd196646c6515fea3d6c43f66162833c6ae4939bfb229b9956d91c6cf17"
-  name = "github.com/spf13/viper"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "b5bf975e5823809fb22c7644d008757f78a4259e"
-  version = "v1.4.0"
-
-[[projects]]
   branch = "master"
   digest = "1:7427036b6d926b3d1fa0773771820735b35554a98296f1074df440ee30a97296"
   name = "golang.org/x/net"
@@ -219,7 +211,6 @@
     "github.com/spf13/afero",
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",
-    "github.com/spf13/viper",
     "golang.org/x/net/websocket",
   ]
   solver-name = "gps-cdcl"

@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	//"gitlab.51idc.com/smartops/smartcat-agent/pkg/util/log"
+	//"gitlab.51idc.com/smartops/smartops-agent/pkg/util/log"
 	//log "github.com/cihub/seelog"
 	"strings"
 
@@ -75,7 +75,7 @@ func parseShortFilePath(params string) seelog.FormatterFunc {
 
 func extractShortPathFromFullPath(fullPath string) string {
 	// We want to trim the part containing the path of the project
-	// ie DataDog/smartcat-agent/
+	// ie DataDog/smartops-agent/
 	slices := strings.Split(fullPath, "-agent/")
 	return slices[len(slices)-1]
 }

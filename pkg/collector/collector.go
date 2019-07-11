@@ -2,8 +2,8 @@ package collector
 
 import (
 	"fmt"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/defaults"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/defaults"
 	"time"
 )
 

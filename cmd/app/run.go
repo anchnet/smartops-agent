@@ -4,11 +4,11 @@ import (
 	"fmt"
 	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
-	"gitlab.51idc.com/smartops/smartcat-agent/cmd/common"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/core"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/config"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/sender"
+	"gitlab.51idc.com/smartops/smartops-agent/cmd/common"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/core"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/config"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/sender"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	CaptureCmd.AddCommand(runCmd)
+	Command.AddCommand(runCmd)
 }
 
 var (

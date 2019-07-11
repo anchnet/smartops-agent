@@ -3,8 +3,8 @@ package system
 import (
 	log "github.com/cihub/seelog"
 	"github.com/shirou/gopsutil/cpu"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/collector/defaults"
-	"gitlab.51idc.com/smartops/smartcat-agent/pkg/metrics"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/collector/defaults"
+	"gitlab.51idc.com/smartops/smartops-agent/pkg/metrics"
 	"time"
 )
 
