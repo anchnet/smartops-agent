@@ -1,23 +1,30 @@
 package system
 
 import (
-	"github.com/anchnet/smartops-agent/pkg/collector/core"
-	"github.com/anchnet/smartops-agent/pkg/collector/defaults"
+	"fmt"
+	"github.com/anchnet/smartops-agent/pkg/metrics"
 )
 
-const checkPrefix = "system."
-
 type SystemCheck struct {
-	core.CheckBase
 }
 
-func (SystemCheck) Run() error {
-	//cpuMetrics =
-	return nil
-}
+func (SystemCheck) Run() ([]metrics.MetricSample, error) {
+	var samples = []metrics.MetricSample{}
+	cpus, err := runCPUCheck()
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range cpus {
+		samples = append(samples, c)
+	}
+	mems, err := runMemCheck()
+	if err != nil {
+		return nil, err
+	}
+	for _, m := range mems {
+		samples = append(samples, m)
+	}
 
-func init() {
-	core.RegisterCheck(checkPrefix, &SystemCheck{
-		CheckBase: core.NewCheckBase(checkPrefix, defaults.CheckInterval),
-	})
+	fmt.Println(samples)
+	return samples, nil
 }

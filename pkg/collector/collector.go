@@ -2,22 +2,28 @@ package collector
 
 import (
 	"fmt"
-	"github.com/anchnet/smartops-agent/pkg/collector/core"
-	"github.com/anchnet/smartops-agent/pkg/collector/defaults"
+	"github.com/anchnet/smartops-agent/pkg/collector/system"
 	"time"
 )
 
-var checks = core.LoadChecks()
+const CHECK_INTERVAL = 10 * time.Second
+
+var ticker *time.Ticker
+var check Check
 
 func Collect() {
-	ticker := time.NewTicker(defaults.CheckInterval)
 	go func() {
-		fmt.Println("Scheduling check: ", nil)
-		for {
-			select {
-			case <-ticker.C:
-				//check.Run()
+		for _ = range ticker.C {
+			samples, err := check.Run()
+			if err != nil {
+				fmt.Println(err)
 			}
+			fmt.Println("samples:", len(samples))
 		}
 	}()
+}
+
+func init() {
+	ticker = time.NewTicker(CHECK_INTERVAL)
+	check = system.SystemCheck{}
 }

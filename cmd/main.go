@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/anchnet/smartops-agent/cmd/app"
-	_ "github.com/anchnet/smartops-agent/pkg/collector/system"
 	"os"
 )
 
