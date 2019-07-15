@@ -7,15 +7,15 @@ import (
 
 var (
 	senderInstance *checkSender
-	checkMetricIn  = make(chan metrics.SenderMetrics)
+	checkMetricIn  = make(chan []metrics.MetricSample)
 )
 
 type checkSender struct {
-	smsOut          chan<- metrics.SenderMetrics
+	smsOut          chan<- []metrics.MetricSample
 	forwardInstance *forward.Forward
 }
 
-func newCheckSender(smsOut chan<- metrics.SenderMetrics) *checkSender {
+func newCheckSender(smsOut chan<- []metrics.MetricSample) *checkSender {
 	return &checkSender{
 		smsOut:          smsOut,
 		forwardInstance: forward.NewForward(),
@@ -29,7 +29,7 @@ func GetSender() *checkSender {
 	return senderInstance
 }
 
-func (s *checkSender) Commit(metrics metrics.SenderMetrics) {
+func (s *checkSender) Commit(metrics []metrics.MetricSample) {
 	s.smsOut <- metrics
 }
 

@@ -1,7 +1,6 @@
 package system
 
 import (
-	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/metrics"
 )
 
@@ -9,7 +8,7 @@ type SystemCheck struct {
 }
 
 func (SystemCheck) Run() ([]metrics.MetricSample, error) {
-	var samples = []metrics.MetricSample{}
+	var samples []metrics.MetricSample
 	cpus, err := runCPUCheck()
 	if err != nil {
 		return nil, err
@@ -25,6 +24,5 @@ func (SystemCheck) Run() ([]metrics.MetricSample, error) {
 		samples = append(samples, m)
 	}
 
-	fmt.Println(samples)
 	return samples, nil
 }

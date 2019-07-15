@@ -17,13 +17,3 @@ func NewServerMetricSample(metric string, value float64, tags map[string]string)
 		Tags:     tags,
 	}
 }
-
-type SenderMetrics struct {
-	Metrics []*MetricSample
-}
-
-func NewSenderMetrics(metrics []*MetricSample) SenderMetrics {
-	return SenderMetrics{
-		Metrics: metrics,
-	}
-}

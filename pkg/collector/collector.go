@@ -1,8 +1,9 @@
 package collector
 
 import (
-	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/collector/system"
+	"github.com/anchnet/smartops-agent/pkg/sender"
+	log "github.com/cihub/seelog"
 	"time"
 )
 
@@ -12,13 +13,15 @@ var ticker *time.Ticker
 var check Check
 
 func Collect() {
+	send := sender.GetSender()
 	go func() {
-		for _ = range ticker.C {
-			samples, err := check.Run()
-			if err != nil {
-				fmt.Println(err)
+		for range ticker.C {
+			if samples, err := check.Run(); err != nil {
+				log.Warn(err)
+			} else {
+				send.Commit(samples)
+				log.Infof("samples: %d", len(samples))
 			}
-			fmt.Println("samples:", len(samples))
 		}
 	}()
 }
