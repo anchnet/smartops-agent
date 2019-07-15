@@ -33,6 +33,13 @@ func (s *checkSender) Commit(metrics []metrics.MetricSample) {
 	s.smsOut <- metrics
 }
 
+func (s *checkSender) Connect() error {
+	if err := s.forwardInstance.Connect(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *checkSender) Run() {
 	for {
 		select {

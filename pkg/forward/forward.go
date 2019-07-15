@@ -21,14 +21,10 @@ type Forward struct {
 
 func NewForward() *Forward {
 	ws := &Forward{}
-	if err := ws.connect(); err != nil {
-		panic(err)
-	}
-
 	return ws
 }
 
-func (w *Forward) connect() error {
+func (w *Forward) Connect() error {
 	var err error
 	w.wsInstance, _, err = websocket.DefaultDialer.Dial(wsUrl, nil)
 	if err != nil {
@@ -57,7 +53,7 @@ func (w *Forward) reconnect() {
 			w.wsInstance.Close()
 		}
 		log.Infof("Reconnect... #%d", num)
-		w.connect()
+		w.Connect()
 		num++
 		time.Sleep(10 * time.Second)
 	}

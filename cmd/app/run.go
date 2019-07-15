@@ -87,6 +87,9 @@ func startAgent() error {
 
 	// setup the sender
 	send := sender.GetSender()
+	if err := send.Connect(); err != nil {
+		return fmt.Errorf("Error while sender connect, %v", err)
+	}
 	go func() {
 		send.Run()
 	}()
