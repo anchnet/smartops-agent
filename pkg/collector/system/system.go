@@ -23,6 +23,5 @@ func (SystemCheck) Run() ([]metrics.MetricSample, error) {
 	for _, m := range mems {
 		samples = append(samples, m)
 	}
-
 	return samples, nil
 }
