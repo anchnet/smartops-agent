@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const CHECK_INTERVAL = 10 * time.Second
+const CheckInterval = 10 * time.Second
 
 var ticker *time.Ticker
 var check Check
@@ -27,6 +27,6 @@ func Collect() {
 }
 
 func init() {
-	ticker = time.NewTicker(CHECK_INTERVAL)
+	ticker = time.NewTicker(CheckInterval)
 	check = system.SystemCheck{}
 }

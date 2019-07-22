@@ -5,6 +5,9 @@ import (
 	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/collector"
 	"github.com/anchnet/smartops-agent/pkg/config"
+	"github.com/anchnet/smartops-agent/pkg/forwarder"
+	"github.com/anchnet/smartops-agent/pkg/packet"
+	"github.com/anchnet/smartops-agent/pkg/receiver"
 	"github.com/anchnet/smartops-agent/pkg/sender"
 	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
@@ -24,11 +27,12 @@ var (
 		Short: "Run collector",
 		RunE:  run,
 	}
+	forward *forwarder.Forwarder
 )
 
 func run(cmd *cobra.Command, args []string) error {
 	defer func() {
-		// Stop Collector
+		stopAgent()
 	}()
 	signalOS := make(chan os.Signal, 1)
 	signal.Notify(signalOS, os.Interrupt, syscall.SIGTERM)
@@ -48,7 +52,6 @@ func run(cmd *cobra.Command, args []string) error {
 	select {
 	case err := <-signalStop:
 		return err
-
 	}
 }
 func startAgent() error {
@@ -85,15 +88,37 @@ func startAgent() error {
 
 	log.Info("Starting SmartOps Agent...")
 
-	// setup the sender
-	send := sender.GetSender()
-	if err := send.Connect(); err != nil {
+	// setup the forwarder
+	forward = forwarder.GetForwarder()
+	if err := forward.Connect(); err != nil {
 		return fmt.Errorf("Error while sender connect, %v", err)
 	}
+
+	// setup the sender
+	send := sender.GetSender()
 	go func() {
 		send.Run()
 	}()
+
+	// setup the receiver
+	closeChan := make(chan packet.Authorize)
+	receive := receiver.GetReceiver()
+	go func() {
+		receive.Run(closeChan)
+	}()
+	auth := <-closeChan
+	if !auth.Success {
+		return fmt.Errorf(auth.Message)
+	}
 	log.Info("Start running...")
 	collector.Collect()
 	return nil
+}
+
+func stopAgent() {
+	if forward != nil {
+		if err := forward.Stop(); err != nil {
+			log.Errorf("Error while stop agent, %v", err)
+		}
+	}
 }

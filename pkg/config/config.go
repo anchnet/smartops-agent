@@ -6,8 +6,9 @@ import (
 	"strings"
 )
 
-const defaultDomain = "192.168.101.6:8100"
-const defaultWsSite = "ws://" + defaultDomain + "/monitor"
+//const defaultDomain = "192.168.101.6:8100"
+const defaultDomain = "localhost:8100"
+const defaultWsSite = "ws://" + defaultDomain + "/ws"
 const defaultSiteOri = "http://" + defaultDomain + "/"
 
 var overrideVars = map[string]interface{}{}
@@ -31,6 +32,7 @@ func initConfig(config Config) {
 	config.SetDefault("ws_site", defaultWsSite)
 	config.SetDefault("site_ori", defaultSiteOri)
 	config.BindEnvAndSetDefault("endpoint", nil)
+	config.BindEnvAndSetDefault("api_key", nil)
 
 	// Log
 	config.BindEnvAndSetDefault("log_file_max_size", "10Mb")

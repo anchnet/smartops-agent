@@ -1,50 +1,51 @@
 package sender
 
 import (
-	"github.com/anchnet/smartops-agent/pkg/forward"
+	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/metrics"
+	"github.com/anchnet/smartops-agent/pkg/packet"
 )
 
 var (
-	senderInstance *checkSender
+	senderInstance *sender
 	checkMetricIn  = make(chan []metrics.MetricSample)
 )
 
-type checkSender struct {
+type sender struct {
 	smsOut          chan<- []metrics.MetricSample
-	forwardInstance *forward.Forward
+	forwardInstance *forwarder.Forwarder
 }
 
-func newCheckSender(smsOut chan<- []metrics.MetricSample) *checkSender {
-	return &checkSender{
+func newSender(smsOut chan<- []metrics.MetricSample) *sender {
+	return &sender{
 		smsOut:          smsOut,
-		forwardInstance: forward.NewForward(),
+		forwardInstance: forwarder.GetForwarder(),
 	}
 }
 
-func GetSender() *checkSender {
+func GetSender() *sender {
 	if senderInstance == nil {
-		senderInstance = newCheckSender(checkMetricIn)
+		senderInstance = newSender(checkMetricIn)
 	}
 	return senderInstance
 }
 
-func (s *checkSender) Commit(metrics []metrics.MetricSample) {
+func (s *sender) Commit(metrics []metrics.MetricSample) {
 	s.smsOut <- metrics
 }
 
-func (s *checkSender) Connect() error {
+func (s *sender) Connect() error {
 	if err := s.forwardInstance.Connect(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *checkSender) Run() {
+func (s *sender) Run() {
 	for {
 		select {
 		case senderMetrics := <-checkMetricIn:
-			s.forwardInstance.Send(senderMetrics)
+			s.forwardInstance.Send(packet.NewPacket(packet.MonitorData, senderMetrics))
 		}
 	}
 }
