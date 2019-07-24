@@ -11,7 +11,6 @@ import (
 )
 
 var (
-	wsUrl           = config.SmartOps.GetString("ws_site")
 	forwardInstance *Forwarder
 )
 
@@ -37,6 +36,7 @@ func (w *Forwarder) Connect() error {
 	if w.wsInstance != nil && w.connected {
 		return nil
 	}
+	wsUrl := config.SmartOps.GetString("ws_site")
 	w.wsInstance, _, err = websocket.DefaultDialer.Dial(wsUrl, nil)
 	if err != nil {
 		return err

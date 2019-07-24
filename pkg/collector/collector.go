@@ -16,12 +16,9 @@ func Collect() {
 	send := sender.GetSender()
 	go func() {
 		for range ticker.C {
-			if samples, err := check.Run(); err != nil {
-				log.Warn(err)
-			} else {
-				send.Commit(samples)
-				log.Infof("samples: %d", len(samples))
-			}
+			samples := check.Run()
+			send.Commit(samples)
+			log.Infof("samples: %d", len(samples))
 		}
 	}()
 }

@@ -1,10 +1,10 @@
 package collector
 
-import "github.com/anchnet/smartops-agent/pkg/metrics"
+import "github.com/anchnet/smartops-agent/pkg/metric"
 
 // Check is an interface for types capable to run checks
 type Check interface {
-	Run() ([]metrics.MetricSample, error) // run the check
+	Run() []metric.MetricSample // run the check
 	//Stop()                                               // stop the check if it's running
 	//String() string // provide a printable version of the check name
 	//Configure(config, initConfig integration.Data) error // configure the check from the outside

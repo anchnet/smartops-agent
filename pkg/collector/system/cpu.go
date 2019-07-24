@@ -1,15 +1,21 @@
 package system
 
 import (
-	"github.com/anchnet/smartops-agent/pkg/metrics"
+	"fmt"
+	"github.com/anchnet/smartops-agent/pkg/metric"
 	"github.com/shirou/gopsutil/cpu"
+	"time"
 )
 
 var lastCycle float64
 var lastCPUTimes cpu.TimesStat
 
-func runCPUCheck() ([]metrics.MetricSample, error) {
-	samples := []metrics.MetricSample{}
+const (
+	cpuMetric = "system.cpu.%s"
+)
+
+func runCPUCheck(time time.Time) ([]metric.MetricSample, error) {
+	var samples []metric.MetricSample
 	cpuTimes, _ := cpu.Times(false)
 	t := cpuTimes[0]
 	cycle := t.Total()
@@ -21,12 +27,12 @@ func runCPUCheck() ([]metrics.MetricSample, error) {
 	steal := (t.Steal - lastCPUTimes.Steal) * toPercent
 	guest := (t.Guest - lastCPUTimes.Guest) * toPercent
 
-	samples = append(samples, metrics.NewServerMetricSample("system.cpu.user", user, nil))
-	samples = append(samples, metrics.NewServerMetricSample("system.cpu.system", system, nil))
-	samples = append(samples, metrics.NewServerMetricSample("system.cpu.iowait", iowait, nil))
-	samples = append(samples, metrics.NewServerMetricSample("system.cpu.idle", idle, nil))
-	samples = append(samples, metrics.NewServerMetricSample("system.cpu.steal", steal, nil))
-	samples = append(samples, metrics.NewServerMetricSample("system.cpu.guest", guest, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "user"), user, metric.UnitPercent, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "system"), system, metric.UnitPercent, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "iowait"), iowait, metric.UnitPercent, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "idle"), idle, metric.UnitPercent, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "steal"), steal, metric.UnitPercent, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "guest"), guest, metric.UnitPercent, time, nil))
 	lastCycle = cycle
 	return samples, nil
 }

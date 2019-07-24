@@ -1,27 +1,38 @@
 package system
 
 import (
-	"github.com/anchnet/smartops-agent/pkg/metrics"
+	"github.com/anchnet/smartops-agent/pkg/metric"
+	log "github.com/cihub/seelog"
+	"time"
 )
 
 type SystemCheck struct {
 }
 
-func (SystemCheck) Run() ([]metrics.MetricSample, error) {
-	var samples []metrics.MetricSample
-	cpus, err := runCPUCheck()
-	if err != nil {
-		return nil, err
+func (SystemCheck) Run() []metric.MetricSample {
+	var samples []metric.MetricSample
+	t := time.Now()
+
+	//cpu
+	if s, err := runCPUCheck(t); err != nil {
+		log.Warn(err)
+	} else {
+		samples = append(samples, s...)
 	}
-	for _, c := range cpus {
-		samples = append(samples, c)
+
+	//mem
+	if s, err := runMemCheck(t); err != nil {
+		log.Warn(err)
+	} else {
+		samples = append(samples, s...)
 	}
-	mems, err := runMemCheck()
-	if err != nil {
-		return nil, err
+
+	//disk
+	if s, err := runDiskCheck(t); err != nil {
+		log.Warn(err)
+	} else {
+		samples = append(samples, s...)
 	}
-	for _, m := range mems {
-		samples = append(samples, m)
-	}
-	return samples, nil
+
+	return samples
 }
