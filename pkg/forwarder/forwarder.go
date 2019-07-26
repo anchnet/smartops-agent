@@ -64,13 +64,15 @@ func (w *Forwarder) Stop() error {
 func (w *Forwarder) Send(packet packet.Packet) {
 	buffer := new(bytes.Buffer)
 	_ = json.NewEncoder(buffer).Encode(packet)
-	err := w.wsInstance.WriteJSON(packet)
-	if err != nil {
-		log.Error(err)
-		w.connected = false
-		w.reconnect()
-	} else {
-		log.Infof("Successfully posted payload")
+	if w.wsInstance != nil {
+		err := w.wsInstance.WriteJSON(packet)
+		if err != nil {
+			log.Error(err)
+			w.connected = false
+			w.reconnect()
+		} else {
+			log.Infof("Successfully posted payload")
+		}
 	}
 }
 func (w *Forwarder) Receive(ch chan<- packet.Authorize) (string, error) {

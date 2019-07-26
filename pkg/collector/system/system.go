@@ -34,5 +34,12 @@ func (SystemCheck) Run() []metric.MetricSample {
 		samples = append(samples, s...)
 	}
 
+	//load
+	if s, err := runLoadCheck(t); err != nil {
+		log.Warn(err)
+	} else {
+		samples = append(samples, s...)
+	}
+
 	return samples
 }
