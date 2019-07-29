@@ -17,30 +17,26 @@ const (
 func runCPUCheck(time time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	cpuTimes, _ := cpu.Times(false)
-	t := cpuTimes[0]
-	cycle := t.Total()
-	toPercent := 100 / (cycle - lastCycle)
-	user := ((t.User + t.Nice) - (lastCPUTimes.User + lastCPUTimes.Nice)) * toPercent
-	system := ((t.System + t.Irq + t.Softirq) - (lastCPUTimes.System + lastCPUTimes.Irq + lastCPUTimes.Softirq)) * toPercent
-	iowait := (t.Iowait - lastCPUTimes.Iowait) * toPercent
-	idle := (t.Idle - lastCPUTimes.Idle) * toPercent
-	steal := (t.Steal - lastCPUTimes.Steal) * toPercent
-	guest := (t.Guest - lastCPUTimes.Guest) * toPercent
+	timesStat := cpuTimes[0]
+	cycle := timesStat.Total()
 
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "user"), user, metric.UnitPercent, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "system"), system, metric.UnitPercent, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "iowait"), iowait, metric.UnitPercent, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "idle"), idle, metric.UnitPercent, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "steal"), steal, metric.UnitPercent, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "guest"), guest, metric.UnitPercent, time, nil))
+	if lastCycle != 0 {
+		toPercent := 100 / (cycle - lastCycle)
+		user := ((timesStat.User + timesStat.Nice) - (lastCPUTimes.User + lastCPUTimes.Nice)) * toPercent
+		system := ((timesStat.System + timesStat.Irq + timesStat.Softirq) - (lastCPUTimes.System + lastCPUTimes.Irq + lastCPUTimes.Softirq)) * toPercent
+		iowait := (timesStat.Iowait - lastCPUTimes.Iowait) * toPercent
+		idle := (timesStat.Idle - lastCPUTimes.Idle) * toPercent
+		steal := (timesStat.Steal - lastCPUTimes.Steal) * toPercent
+		guest := (timesStat.Guest - lastCPUTimes.Guest) * toPercent
+
+		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "user"), user, metric.UnitPercent, time, nil))
+		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "system"), system, metric.UnitPercent, time, nil))
+		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "iowait"), iowait, metric.UnitPercent, time, nil))
+		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "idle"), idle, metric.UnitPercent, time, nil))
+		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "steal"), steal, metric.UnitPercent, time, nil))
+		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(cpuMetric, "guest"), guest, metric.UnitPercent, time, nil))
+	}
 	lastCycle = cycle
+	lastCPUTimes = cpuTimes[0]
 	return samples, nil
-}
-
-// 初始化 CPU Times
-func init() {
-	cpuTimes, _ := cpu.Times(false)
-	t := cpuTimes[0]
-	lastCPUTimes = t
-	lastCycle = t.Total()
 }

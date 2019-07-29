@@ -17,7 +17,7 @@ var (
 
 func init() {
 	// Configure SmartOps global configuration
-	SmartOps = NewConfig("smartops", "SC", strings.NewReplacer(".", "_"))
+	SmartOps = NewConfig("smartops", "SO", strings.NewReplacer(".", "_"))
 	// Configuration defaults
 	initConfig(SmartOps)
 }

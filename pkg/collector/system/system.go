@@ -1,15 +1,21 @@
 package system
 
 import (
+	"encoding/json"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	log "github.com/cihub/seelog"
 	"time"
 )
 
-type SystemCheck struct {
+type systemCheck struct {
+	first bool
 }
 
-func (SystemCheck) Run() []metric.MetricSample {
+func NewSystemCheck() *systemCheck {
+	return &systemCheck{first: true}
+}
+
+func (sys *systemCheck) Run() []metric.MetricSample {
 	var samples []metric.MetricSample
 	t := time.Now()
 
@@ -34,6 +40,13 @@ func (SystemCheck) Run() []metric.MetricSample {
 		samples = append(samples, s...)
 	}
 
+	//disk io
+	if s, err := runIOStatsCheck(t); err != nil {
+		log.Warn(err)
+	} else {
+		samples = append(samples, s...)
+	}
+
 	//load
 	if s, err := runLoadCheck(t); err != nil {
 		log.Warn(err)
@@ -41,5 +54,19 @@ func (SystemCheck) Run() []metric.MetricSample {
 		samples = append(samples, s...)
 	}
 
+	////net
+	//if s, err := runNetworkCheck(t); err != nil {
+	//	log.Warn(err)
+	//} else {
+	//	samples = append(samples, s...)
+	//}
+
+	//首次数据不发送
+	if sys.first {
+		sys.first = false
+		return make([]metric.MetricSample, 0)
+	}
+	jsonByte, _ := json.Marshal(samples)
+	log.Debug(string(jsonByte))
 	return samples
 }

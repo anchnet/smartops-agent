@@ -58,7 +58,7 @@ func collectPartitionMetrics(partitions []disk.PartitionStat, time time.Time) []
 		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "total"), float64(usage.Total), metric.UnitByte, time, tag))
 		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "used"), float64(usage.Used), metric.UnitByte, time, tag))
 		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "free"), float64(usage.Free), metric.UnitByte, time, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "used_pct"), float64(usage.UsedPercent), metric.UnitPercent, time, tag))
+		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "used.pct"), float64(usage.UsedPercent), metric.UnitPercent, time, tag))
 	}
 
 	return samples

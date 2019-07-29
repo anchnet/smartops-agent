@@ -119,7 +119,7 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:61197231273afdc4a9435b6a4ba175547d5462c3d7d9daf0f13a31af02a9c977"
+  digest = "1:e1c256c007550b0fc60637d279d6ec1486bbfc9ac69f9a6cb51af892237f915a"
   name = "github.com/shirou/gopsutil"
   packages = [
     "cpu",
@@ -127,6 +127,7 @@
     "internal/common",
     "load",
     "mem",
+    "net",
   ]
   pruneopts = "UT"
   revision = "4c8b404ee5c53b04b04f34b1744a26bf5d2910de"
@@ -222,6 +223,7 @@
     "github.com/shirou/gopsutil/disk",
     "github.com/shirou/gopsutil/load",
     "github.com/shirou/gopsutil/mem",
+    "github.com/shirou/gopsutil/net",
     "github.com/spf13/afero",
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",

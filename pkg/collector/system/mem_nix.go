@@ -22,7 +22,7 @@ func runMemCheck(time time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	v, err := mem.VirtualMemory()
 	if err != nil {
-		log.Errorf("Could not retrieve virtual memory stats: %s", err)
+		log.Errorf("Could not retrieve virtual memory diskStats: %s", err)
 		return nil, err
 	}
 	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "total"), float64(v.Total), metric.UnitByte, time, nil))
