@@ -28,6 +28,12 @@
 [[constraint]]
   name = "github.com/spf13/cobra"
   version = "0.0.5"
+[[constraint]]
+name = "github.com/shirou/gopsutil"
+version = "^v2.18.12"
+[[constraint]]
+  name = "github.com/DataDog/gopsutil"
+  revision = "fe7986fb54b7a36afebec4610af9daa8e5f34f89"
 
 [prune]
   go-tests = true

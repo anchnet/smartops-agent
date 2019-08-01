@@ -54,18 +54,20 @@ func (sys *systemCheck) Run() []metric.MetricSample {
 		samples = append(samples, s...)
 	}
 
-	////net
-	//if s, err := runNetworkCheck(t); err != nil {
-	//	log.Warn(err)
-	//} else {
-	//	samples = append(samples, s...)
-	//}
-
-	//首次数据不发送
-	if sys.first {
-		sys.first = false
-		return make([]metric.MetricSample, 0)
+	//net
+	if s, err := runNetworkCheck(t); err != nil {
+		log.Warn(err)
+	} else {
+		samples = append(samples, s...)
 	}
+
+	//proc
+	if s, err := runProcCheck(t); err != nil {
+		log.Warn(err)
+	} else {
+		samples = append(samples, s...)
+	}
+
 	jsonByte, _ := json.Marshal(samples)
 	log.Debug(string(jsonByte))
 	return samples
