@@ -40,6 +40,5 @@ func (s *receiver) Run(ch chan<- packet.Authorize) {
 		if err != nil {
 			log.Error(str)
 		}
-		log.Info(str)
 	}
 }

@@ -1,14 +1,13 @@
 package config
 
 import (
-	//"github.com/anchnet/smartops-agent/pkg/util/log"
+	"github.com/anchnet/smartops-agent/pkg/util/viper"
 	log "github.com/cihub/seelog"
 	"io"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/DataDog/viper"
 	"github.com/spf13/afero"
 	"github.com/spf13/pflag"
 )

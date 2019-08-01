@@ -1,7 +1,6 @@
 package config
 
 import (
-	//"github.com/anchnet/smartops-agent/pkg/util/log"
 	log "github.com/cihub/seelog"
 	"strings"
 )
