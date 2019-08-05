@@ -4,24 +4,21 @@ import (
 	"fmt"
 	"github.com/DataDog/gopsutil/cpu"
 	"github.com/DataDog/gopsutil/process"
+	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"github.com/shirou/gopsutil/mem"
 	"strconv"
-
 	"strings"
 	"time"
 )
 
-var (
+type ProcCheck struct {
+	core.CheckBase
 	lastProcs       map[int32]*process.FilledProcess
 	lastProcCPUTime cpu.TimesStat
-)
+}
 
-const (
-	procMetric = "system.proc.%s"
-)
-
-func runProcCheck(t time.Time) ([]metric.MetricSample, error) {
+func (c *ProcCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 
 	cpuTimes, err := cpu.Times(false)
@@ -32,42 +29,46 @@ func runProcCheck(t time.Time) ([]metric.MetricSample, error) {
 	if err != nil {
 		return samples, err
 	}
-	if lastProcs == nil {
-		lastProcs = procs
-		lastProcCPUTime = cpuTimes[0]
-		return samples, nil
-	}
-	memInfo, err := mem.VirtualMemory()
-	if err != nil {
-		return samples, err
-	}
-
-	totalMem := memInfo.Total
-	for _, p := range procs {
-
-		if _, ok := lastProcs[p.Pid]; !ok {
-			continue
+	if c.lastProcs != nil {
+		memInfo, err := mem.VirtualMemory()
+		if err != nil {
+			return samples, err
 		}
-		tag := make(map[string]string, 4)
-		tag["pid"] = strconv.Itoa(int(p.Pid))
-		tag["name"] = p.Name
-		tag["user"] = p.Username
-		tag["cmdline"] = strings.Join(p.Cmdline, "")
 
-		cpuUsage, cpuUser, cpuSys := formatCPU(p.CpuTime, lastProcs[p.Pid].CpuTime, cpuTimes[0], lastProcCPUTime)
+		totalMem := memInfo.Total
+		for _, p := range procs {
 
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "cpu.usage"), float64(cpuUsage), metric.UnitByte, t, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "cpu.user"), float64(cpuUser), metric.UnitByte, t, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "cpu.system"), float64(cpuSys), metric.UnitByte, t, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "mem.rss"), float64(p.MemInfo.RSS), metric.UnitByte, t, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "mem.vms"), float64(p.MemInfo.VMS), metric.UnitByte, t, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "mem.pct"), float64(p.MemInfo.VMS/totalMem*100), metric.UnitPercent, t, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "mem.pct"), float64(p.MemInfo.VMS/totalMem*100), metric.UnitByte, t, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(procMetric, "thread.count"), float64(p.NumThreads), "", t, tag))
+			if _, ok := c.lastProcs[p.Pid]; !ok {
+				continue
+			}
+			tag := make(map[string]string, 4)
+			tag["pid"] = strconv.Itoa(int(p.Pid))
+			tag["name"] = p.Name
+			tag["user"] = p.Username
+			tag["cmdline"] = strings.Join(p.Cmdline, "")
 
+			cpuUsage, cpuUser, cpuSys := formatCPU(p.CpuTime, c.lastProcs[p.Pid].CpuTime, cpuTimes[0], c.lastProcCPUTime)
+
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.usage"), float64(cpuUsage), metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.user"), float64(cpuUser), metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.system"), float64(cpuSys), metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.rss"), float64(p.MemInfo.RSS), metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.vms"), float64(p.MemInfo.VMS), metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.pct"), float64(p.MemInfo.VMS/totalMem*100), metric.UnitPercent, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.pct"), float64(p.MemInfo.VMS/totalMem*100), metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("thread.count"), float64(p.NumThreads), "", t, tag))
+		}
 	}
+
+	// Store the last state for comparison on the next run
+	c.lastProcs = procs
+	c.lastProcCPUTime = cpuTimes[0]
 
 	return samples, nil
+}
+func (c ProcCheck) formatMetric(name string) string {
+	format := "system.proc.%s"
+	return fmt.Sprintf(format, name)
 }
 
 func formatCPU(t2, t1, syst2, syst1 cpu.TimesStat) (float32, float32, float32) {
@@ -85,12 +86,17 @@ func calculatePct(deltaProc, deltaTime float64) float32 {
 	if deltaTime == 0 {
 		return 0
 	}
-
 	overalPct := (deltaProc / deltaTime) * 100
-
 	if overalPct > 100 {
 		overalPct = 100
 	}
 
 	return float32(overalPct)
+}
+
+func init() {
+	c := &ProcCheck{
+		CheckBase: core.NewCheckBase("proc"),
+	}
+	core.RegisterCheck(c.String(), c)
 }

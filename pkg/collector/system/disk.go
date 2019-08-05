@@ -2,38 +2,39 @@ package system
 
 import (
 	"fmt"
+	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	log "github.com/cihub/seelog"
 	"github.com/shirou/gopsutil/disk"
 	"time"
 )
 
-const (
-	diskMetric = "system.disk.%s"
-)
+type DiskCheck struct {
+	core.CheckBase
+}
 
-func runDiskCheck(time time.Time) ([]metric.MetricSample, error) {
-
+func (c *DiskCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	partitions, err := disk.Partitions(true)
 	if err != nil {
 		return nil, err
 	}
-	samples = append(samples, collectPartitionMetrics(partitions, time)...)
+	samples = append(samples, c.collectPartitionMetrics(partitions, t)...)
 	return samples, nil
 }
-func excludeDisk(disk disk.PartitionStat) bool {
+
+func (DiskCheck) excludeDisk(disk disk.PartitionStat) bool {
 	if disk.Fstype == "devfs" {
 		return true
 	}
 	return false
 }
 
-func collectPartitionMetrics(partitions []disk.PartitionStat, time time.Time) []metric.MetricSample {
+func (c DiskCheck) collectPartitionMetrics(partitions []disk.PartitionStat, time time.Time) []metric.MetricSample {
 	var samples []metric.MetricSample
 
 	for _, partition := range partitions {
-		if excludeDisk(partition) {
+		if c.excludeDisk(partition) {
 			continue
 		}
 		// Get disk metric here to be able to exclude on total usage
@@ -53,11 +54,22 @@ func collectPartitionMetrics(partitions []disk.PartitionStat, time time.Time) []
 		tag["filesystem"] = partition.Fstype
 		tag["mountpoint"] = partition.Mountpoint
 
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "total"), float64(usage.Total), metric.UnitByte, time, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "used"), float64(usage.Used), metric.UnitByte, time, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "free"), float64(usage.Free), metric.UnitByte, time, tag))
-		samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(diskMetric, "used.pct"), usage.UsedPercent, metric.UnitPercent, time, tag))
+		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("total"), float64(usage.Total), metric.UnitByte, time, tag))
+		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used"), float64(usage.Used), metric.UnitByte, time, tag))
+		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("free"), float64(usage.Free), metric.UnitByte, time, tag))
+		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used.pct"), usage.UsedPercent, metric.UnitPercent, time, tag))
 	}
 
 	return samples
+}
+func (c DiskCheck) formatMetric(name string) string {
+	format := "system.disk.%s"
+	return fmt.Sprintf(format, name)
+}
+
+func init() {
+	c := &DiskCheck{
+		CheckBase: core.NewCheckBase("disk"),
+	}
+	core.RegisterCheck(c.String(), c)
 }

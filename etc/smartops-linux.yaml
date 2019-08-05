@@ -1,0 +1,4 @@
+endpoint: 37772a864cce474fbe74326e1ecd4ab9_192.168.101.101
+api_key: 123456
+ws_site: ws://192.168.101.6:8100/ws
+log_level: debug

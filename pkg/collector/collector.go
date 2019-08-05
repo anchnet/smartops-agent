@@ -10,14 +10,13 @@ import (
 const checkInterval = 10 * time.Second
 
 var ticker *time.Ticker
-var check Check
 
 func Collect() {
 	first := true
 	send := sender.GetSender()
 	go func() {
 		for range ticker.C {
-			samples := check.Run()
+			samples := system.Collect()
 			//首次数据不发送
 			if first {
 				first = false
@@ -31,5 +30,4 @@ func Collect() {
 
 func init() {
 	ticker = time.NewTicker(checkInterval)
-	check = system.NewSystemCheck()
 }
