@@ -1,5 +1,3 @@
-//+build linux
-
 package system
 
 import (
@@ -41,7 +39,7 @@ func runNetworkCheck(t time.Time) ([]metric.MetricSample, error) {
 		}
 		lastNetStats, ok := netStats[interfaceIO.Name]
 		if !ok {
-			log.Debug("New device diskStats (possible hotplug) - full diskStats unavailable this iteration.")
+			log.Debug("New device netStats (possible hotplug) - full netStats unavailable this iteration.")
 			continue
 		}
 		if delta == 0 {

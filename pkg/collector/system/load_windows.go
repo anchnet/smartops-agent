@@ -1,4 +1,4 @@
-//+build darwin
+// +build windows
 
 package system
 
@@ -7,7 +7,11 @@ import (
 	"time"
 )
 
-func runNetworkCheck(t time.Time) ([]metric.MetricSample, error) {
+const (
+	loadMetric = "system.load.%s"
+)
+
+func runLoadCheck(time time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	return samples, nil
 }

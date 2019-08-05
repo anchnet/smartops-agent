@@ -27,8 +27,8 @@ func runMemCheck(time time.Time) ([]metric.MetricSample, error) {
 	}
 	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "total"), float64(v.Total), metric.UnitByte, time, nil))
 	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "free"), float64(v.Free), metric.UnitByte, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "free"), float64(v.Total-v.Free), metric.UnitByte, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "used_pct"), float64(v.Used)/float64(v.Total)*100, metric.UnitPercent, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "used"), float64(v.Used), metric.UnitByte, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "used_pct"), v.UsedPercent, metric.UnitPercent, time, nil))
 
 	switch runtimeOS {
 	case "linux":
