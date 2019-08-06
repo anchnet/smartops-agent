@@ -14,7 +14,7 @@ type MetricSample struct {
 	Endpoint string            `json:"endpoint"`
 	Metric   string            `json:"metric"`
 	Value    float64           `json:"value"`
-	Tags     map[string]string `json:"tags"`
+	Tag      map[string]string `json:"tag"`
 	Unit     string            `json:"unit"`
 	Time     time.Time         `json:"time"`
 }
@@ -24,7 +24,7 @@ func NewServerMetricSample(metric string, value float64, unit string, time time.
 		Endpoint: config.SmartOps.GetString("endpoint") + "_server",
 		Metric:   metric,
 		Value:    value,
-		Tags:     tags,
+		Tag:      tags,
 		Unit:     unit,
 		Time:     time,
 	}

@@ -23,8 +23,11 @@ func (c *DiskCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	return samples, nil
 }
 
-func (DiskCheck) excludeDisk(disk disk.PartitionStat) bool {
-	if disk.Fstype == "devfs" {
+func (c DiskCheck) exclude(disk disk.PartitionStat) bool {
+	switch disk.Fstype {
+	case "devfs",
+		"devtmpfs",
+		"tmpfs":
 		return true
 	}
 	return false
@@ -34,7 +37,7 @@ func (c DiskCheck) collectPartitionMetrics(partitions []disk.PartitionStat, time
 	var samples []metric.MetricSample
 
 	for _, partition := range partitions {
-		if c.excludeDisk(partition) {
+		if c.exclude(partition) {
 			continue
 		}
 		// Get disk metric here to be able to exclude on total usage

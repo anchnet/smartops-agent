@@ -11,5 +11,3 @@ func NewCheckBase(checkName string) CheckBase {
 func (c CheckBase) String() string {
 	return c.checkName
 }
-
-//

@@ -11,16 +11,23 @@ import (
 
 type NetCheck struct {
 	core.CheckBase
-	ts    int64
-	stats map[string]net.IOCountersStat
+	ts         int64
+	stats      map[string]net.IOCountersStat
+	interfaces map[string]net.InterfaceStat
 }
 
 func (c *NetCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	ioByInterface, err := net.IOCounters(true)
 	if err != nil {
-		return samples, nil
+		return samples, err
 	}
+
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return samples, err
+	}
+
 	interfaceMap := make(map[string]net.IOCountersStat)
 	for _, s := range ioByInterface {
 		interfaceMap[s.Name] = s
@@ -32,6 +39,9 @@ func (c *NetCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 
 	if c.ts != 0 {
 		for _, interfaceIO := range ioByInterface {
+			if c.exclude(interfaceIO) {
+				continue
+			}
 			lastNetStats, ok := c.stats[interfaceIO.Name]
 			if !ok {
 				log.Debug("New device stats (possible hotplug) - full stats unavailable this iteration.")
@@ -62,7 +72,26 @@ func (c *NetCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	}
 	c.stats = interfaceMap
 	c.ts = now
+	if c.interfaces == nil {
+		c.interfaces = make(map[string]net.InterfaceStat, len(interfaces))
+		for _, i := range interfaces {
+			c.interfaces[i.Name] = i
+		}
+	}
 	return samples, nil
+}
+func (c *NetCheck) exclude(stat net.IOCountersStat) bool {
+	i, ok := c.interfaces[stat.Name]
+	if ok {
+		if i.Flags != nil {
+			for _, v := range i.Flags {
+				if v == "loopback" {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func (c NetCheck) formatMetric(name string) string {
