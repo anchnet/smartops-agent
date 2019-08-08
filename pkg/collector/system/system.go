@@ -8,10 +8,9 @@ import (
 	"time"
 )
 
-var checks []core.Check
-
 func Collect() []metric.MetricSample {
 	var samples []metric.MetricSample
+	checks := core.GetAllChecks()
 
 	t := time.Now()
 	for _, c := range checks {
@@ -25,8 +24,4 @@ func Collect() []metric.MetricSample {
 	jsonByte, _ := json.Marshal(samples)
 	log.Debug(string(jsonByte))
 	return samples
-}
-
-func init() {
-	checks = core.GetAllChecks()
 }
