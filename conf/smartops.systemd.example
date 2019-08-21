@@ -1,0 +1,15 @@
+[Unit]
+  Description="Smartops Agent"
+  After=network.target
+
+  [Service]
+  Type=simple
+  WorkingDirectory=/opt/smartops-agent
+  PIDFile=/opt/smartops-agent/var/run/agent.pid
+  Restart=on-failure
+  ExecStart=/opt/smartops-agent/agent run
+  StartLimitInterval=10
+  StartLimitBurst=5
+
+  [Install]
+  WantedBy=multi-user.target
