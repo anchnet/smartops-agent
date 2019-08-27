@@ -1,0 +1,22 @@
+description "Smartops Agent"
+
+start on started network
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+normal exit 0
+
+console output
+
+script
+cd /opt/smartops-agent
+exec SO_LOG_TO_CONSOLE=false  /opt/smartops-agent/agent run
+end script
+
+pre-start script
+end script
+
+post-stop script
+rm -f /opt/smartops-agent/var/run/agent.pid
+end script
