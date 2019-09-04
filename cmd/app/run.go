@@ -7,6 +7,7 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/packet"
+	"github.com/anchnet/smartops-agent/pkg/pidfile"
 	"github.com/anchnet/smartops-agent/pkg/receiver"
 	"github.com/anchnet/smartops-agent/pkg/sender"
 	log "github.com/cihub/seelog"
@@ -87,6 +88,12 @@ func startAgent() error {
 	}
 
 	log.Info("Starting SmartOps Agent...")
+
+	err = pidfile.WritePID(common.DefaultPidFile)
+	if err != nil {
+		return log.Errorf("Error while writing PID file, exiting: %v", err)
+	}
+	log.Infof("pid '%d' written to pid file '%s'", os.Getpid(), common.DefaultPidFile)
 
 	// setup the forwarder
 	forward = forwarder.GetForwarder()
