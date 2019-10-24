@@ -55,7 +55,6 @@ func (c *ProcCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.rss"), float64(p.MemInfo.RSS), metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.vms"), float64(p.MemInfo.VMS), metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.pct"), float64(p.MemInfo.VMS/totalMem*100), metric.UnitPercent, t, tag))
-			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.pct"), float64(p.MemInfo.VMS/totalMem*100), metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("thread.count"), float64(p.NumThreads), "", t, tag))
 		}
 	}

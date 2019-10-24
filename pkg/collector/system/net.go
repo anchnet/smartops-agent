@@ -60,7 +60,7 @@ func (c *NetCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 			sCount := float64(interfaceIO.PacketsSent - lastNetStats.PacketsSent)
 			inErrCount := float64(interfaceIO.Errin - lastNetStats.Errin)
 			outErrCount := float64(interfaceIO.Errout - lastNetStats.Errout)
-			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte,recv"), rBytes, metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.recv"), rBytes, metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.sent"), sBytes, metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.recv.sec"), rBytes/delta, metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.sent.sec"), sBytes/delta, metric.UnitByte, t, tag))
