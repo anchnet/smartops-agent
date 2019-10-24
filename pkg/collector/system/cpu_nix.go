@@ -30,7 +30,9 @@ func (c *CPUCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 		idle := (timesStat.Idle - c.lastCPUTimes.Idle) * toPercent
 		steal := (timesStat.Steal - c.lastCPUTimes.Steal) * toPercent
 		guest := (timesStat.Guest - c.lastCPUTimes.Guest) * toPercent
+		usage := ((timesStat.Total() - timesStat.Guest - timesStat.GuestNice) - (c.lastCPUTimes.Total() - c.lastCPUTimes.Guest - c.lastCPUTimes.GuestNice) - (timesStat.Idle - c.lastCPUTimes.Idle) - (timesStat.Iowait - timesStat.Iowait)) * toPercent
 
+		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used"), usage, metric.UnitPercent, t, nil))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("user"), user, metric.UnitPercent, t, nil))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("system"), system, metric.UnitPercent, t, nil))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("iowait"), iowait, metric.UnitPercent, t, nil))
