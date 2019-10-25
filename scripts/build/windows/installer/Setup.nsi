@@ -1023,55 +1023,18 @@ Function parseCommandLineSwitches
         ${EndIf}
         FileWrite $0 "$\n"
         FileWrite $0 "$\n"
-        FileWrite $0 "Help for Salt Minion installation$\n"
+        FileWrite $0 "Help for Smartops Agent installation$\n"
         FileWrite $0 "===============================================================================$\n"
         FileWrite $0 "$\n"
-        FileWrite $0 "/minion-name=$\t$\tA string value to set the minion name. Default value is$\n"
-        FileWrite $0 "$\t$\t$\t'hostname'. Setting the minion name causes the installer$\n"
-        FileWrite $0 "$\t$\t$\tto use the default config or a custom config if defined$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "/master=$\t$\tA string value to set the IP address or hostname of the$\n"
-        FileWrite $0 "$\t$\t$\tmaster. Default value is 'salt'. You may pass a single$\n"
-        FileWrite $0 "$\t$\t$\tmaster or a comma-separated list of masters. Setting$\n"
-        FileWrite $0 "$\t$\t$\tthe master will cause the installer to use the default$\n"
-        FileWrite $0 "$\t$\t$\tconfig or a custom config if defined$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "/start-minion=$\t$\t1 will start the minion service, 0 will not.$\n"
-        FileWrite $0 "$\t$\t$\tDefault is 1$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "/start-minion-delayed$\tSet the minion start type to 'Automatic (Delayed Start)'$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "/default-config$\t$\tOverwrite the existing config if present with the$\n"
-        FileWrite $0 "$\t$\t$\tdefault config for salt. Default is to use the existing$\n"
-        FileWrite $0 "$\t$\t$\tconfig if present. If /master and/or /minion-name is$\n"
-        FileWrite $0 "$\t$\t$\tpassed, those values will be used to update the new$\n"
-        FileWrite $0 "$\t$\t$\tdefault config$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "$\t$\t$\tAny existing config will be backed up by appending$\n"
-        FileWrite $0 "$\t$\t$\ta timestamp and a .bak extension. That includes\n"
-        FileWrite $0 "$\t$\t$\tthe minion file and the minion.d directory$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "/custom-config=$\t$\tA string value specifying the name of a custom config$\n"
-        FileWrite $0 "$\t$\t$\tfile in the same path as the installer or the full path$\n"
-        FileWrite $0 "$\t$\t$\tto a custom config file. If /master and/or /minion-name$\n"
-        FileWrite $0 "$\t$\t$\tis passed, those values will be used to update the new$\n"
-        FileWrite $0 "$\t$\t$\tcustom config$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "$\t$\t$\tAny existing config will be backed up by appending$\n"
-        FileWrite $0 "$\t$\t$\ta timestamp and a .bak extension. That includes\n"
-        FileWrite $0 "$\t$\t$\tthe minion file and the minion.d directory$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "/S$\t$\t$\tInstall Salt silently$\n"
-        FileWrite $0 "$\n"
-        FileWrite $0 "/?$\t$\t$\tDisplay this help screen$\n"
-        FileWrite $0 "$\n"
+        FileWrite $0 "/endpoint=$\t$\tA string value to set the endpoint. $\n"
+        FileWrite $0 "/apikey=$\t$\tA string value to set the apiKey. $\n"
         FileWrite $0 "-------------------------------------------------------------------------------$\n"
         FileWrite $0 "$\n"
         FileWrite $0 "Examples:$\n"
         FileWrite $0 "$\n"
         FileWrite $0 "${OutFile} /S$\n"
         FileWrite $0 "$\n"
-        FileWrite $0 "${OutFile} /S /minion-name=myminion /master=master.mydomain.com /start-minion-delayed$\n"
+        FileWrite $0 "${OutFile} /S /endpoint=endpoint /apiKey=apiKey $\n"
         FileWrite $0 "$\n"
         FileWrite $0 "===============================================================================$\n"
         FileWrite $0 "$\n"
@@ -1106,16 +1069,23 @@ Function parseCommandLineSwitches
         StrCpy $StartMinion 1
     ${EndIf}
 
-    # Service: Minion Startup Type Delayed
-    ClearErrors
-    ${GetOptions} $R0 "/start-minion-delayed" $R1
-    IfErrors start_minion_delayed_not_found
-        StrCpy $StartMinionDelayed 1
-    start_minion_delayed_not_found:
-
     # Minion Config: Master IP/Name
     # If setting master, we don't want to use existing config
-    ${GetOptions} $R0 "/master=" $R1
+    ${GetOptions} $R0 "/endpoint=" $R1
+    ${IfNot} $R1 == ""
+        StrCpy $Endpoint_State $R1
+    ${ElseIf} $Endpoint_State == ""
+        StrCpy $Endpoint_State ""
+    ${EndIf}
+
+    # Minion Config: Minion ID
+    # If setting minion id, we don't want to use existing config
+    ${GetOptions} $R0 "/apiKey=" $R1
+    ${IfNot} $R1 == ""
+        StrCpy $ApiKey_State $R1
+    ${ElseIf} $ApiKey_State == ""
+        StrCpy $ApiKey_State ""
+    ${EndIf}
 
 
 FunctionEnd
