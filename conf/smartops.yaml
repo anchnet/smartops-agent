@@ -1,0 +1,5 @@
+endpoint: 1111
+api_key: 123456
+#ws_site: ws://192.168.101.6:8100/ws
+ws_site: wss://devtransfer.smartops.anchnet.com/ws
+#ws_site: wss://devapi.smartops.anchnet.com/ws
