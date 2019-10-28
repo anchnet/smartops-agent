@@ -1,4 +1,0 @@
-endpoint: <endpoing>
-api_key: <api_key>
-ws_site: wss://devtransfer.smartops.anchnet.com/ws
-log_level: debug
