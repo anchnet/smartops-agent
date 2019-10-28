@@ -26,10 +26,12 @@ func (c *CPUCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 		toPercent := 100 / (cycle - c.lastCycle)
 		user := ((timesStat.User + timesStat.Nice) - (c.lastCPUTimes.User + c.lastCPUTimes.Nice)) * toPercent
 		system := ((timesStat.System + timesStat.Irq + timesStat.Softirq) - (c.lastCPUTimes.System + c.lastCPUTimes.Irq + c.lastCPUTimes.Softirq)) * toPercent
+		used := user + system
 		idle := (timesStat.Idle - c.lastCPUTimes.Idle) * toPercent
 
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("user"), user, metric.UnitPercent, t, nil))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("system"), system, metric.UnitPercent, t, nil))
+		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used"), used, metric.UnitPercent, t, nil))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("idle"), idle, metric.UnitPercent, t, nil))
 	}
 	c.lastCycle = cycle
