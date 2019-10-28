@@ -123,6 +123,7 @@ func startAgent() error {
 }
 
 func stopAgent() {
+	os.Remove(common.DefaultPidFile)
 	if forward != nil {
 		if err := forward.Stop(); err != nil {
 			log.Errorf("Error while stop agent, %v", err)
