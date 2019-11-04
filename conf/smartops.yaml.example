@@ -1,3 +1,4 @@
-endpoint:
-api_key:
-ws_site: ws://192.168.101.6:8100/ws
+endpoint: <endpoing>
+api_key: <api_key>
+ws_site: wss://devtransfer.smartops.anchnet.com/ws
+log_level: debug

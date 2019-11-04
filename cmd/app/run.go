@@ -6,6 +6,7 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/collector"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
+	"github.com/anchnet/smartops-agent/pkg/heartbeat"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	"github.com/anchnet/smartops-agent/pkg/pidfile"
 	"github.com/anchnet/smartops-agent/pkg/receiver"
@@ -112,6 +113,11 @@ func startAgent() error {
 	receive := receiver.GetReceiver()
 	go func() {
 		receive.Run(closeChan)
+	}()
+
+	// setup heartbeat
+	go func() {
+		heartbeat.Run(forward)
 	}()
 	auth := <-closeChan
 	if !auth.Success {
