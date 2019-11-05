@@ -1,4 +1,3 @@
 endpoint: <endpoing>
 api_key: <api_key>
-ws_site: wss://testtransfer.smartops.anchnet.com/ws
 log_level: info
