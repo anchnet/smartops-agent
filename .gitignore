@@ -18,3 +18,4 @@ vendor/
 .idea
 var
 /go.sum
+conf/smartops.yaml
