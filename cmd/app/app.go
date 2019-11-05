@@ -9,7 +9,7 @@ import (
 
 var (
 	Command = &cobra.Command{
-		Use:   fmt.Sprint("%s [command]", os.Args[0]),
+		Use:   fmt.Sprint("/opt/smartops-agent/agent [command]", os.Args[0]),
 		Short: "SmartOps Agent at your service.",
 	}
 	confFilePath string

@@ -1,6 +1,7 @@
 package heartbeat
 
 import (
+	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	log "github.com/cihub/seelog"
@@ -12,9 +13,8 @@ var ticker *time.Ticker
 func Run(f *forwarder.Forwarder) {
 	go func() {
 		for range ticker.C {
-			log.Infof("heartbeat")
-			hb := packet.NewPacket(packet.Heartbeat, nil)
-			log.Info(hb)
+			hb := packet.NewPacket(packet.Heartbeat, "ping")
+			log.Info(fmt.Sprintf("Heartbeat: %s", hb))
 			f.Send(hb)
 		}
 	}()

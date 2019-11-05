@@ -19,3 +19,4 @@ vendor/
 var
 /go.sum
 conf/smartops.yaml
+/cmd/cmd

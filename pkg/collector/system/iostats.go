@@ -11,7 +11,7 @@ import (
 )
 
 type IOStatsCheck struct {
-	core.CheckBase
+	name  string
 	ts    int64
 	stats map[string]disk.IOCountersStat
 }
@@ -67,5 +67,5 @@ func init() {
 	c := &IOStatsCheck{
 		CheckBase: core.NewCheckBase("iostats"),
 	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(c)
 }

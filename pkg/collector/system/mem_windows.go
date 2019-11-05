@@ -15,7 +15,7 @@ const (
 )
 
 type MemCheck struct {
-	core.CheckBase
+	name string
 }
 
 func (c *MemCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -42,5 +42,5 @@ func init() {
 	c := &MemCheck{
 		CheckBase: core.NewCheckBase("men"),
 	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(c)
 }

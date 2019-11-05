@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
+var name string = "cpu"
+
 type CPUCheck struct {
-	core.CheckBase
+	name         string
 	lastCycle    float64
 	lastCPUTimes cpu.TimesStat
 }
@@ -46,7 +48,7 @@ func (c CPUCheck) formatMetric(name string) string {
 
 func init() {
 	c := &CPUCheck{
-		CheckBase: core.NewCheckBase("cpu"),
+		name: name,
 	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(c)
 }

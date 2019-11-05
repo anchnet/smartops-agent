@@ -14,9 +14,9 @@ func Collect() []metric.MetricSample {
 
 	t := time.Now()
 	for _, c := range checks {
-		log.Infof("Running check %s", c.String())
+		log.Infof("Running check %s", c.Name())
 		if s, err := c.Collect(t); err != nil {
-			log.Warnf("Error while run collect %s, %v", c.String(), err)
+			log.Warnf("Error while run collect %s, %v", c.Name(), err)
 		} else {
 			samples = append(samples, s...)
 		}

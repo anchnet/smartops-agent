@@ -13,7 +13,7 @@ import (
 )
 
 type ProcCheck struct {
-	core.CheckBase
+	name            string
 	lastProcs       map[int32]*process.FilledProcess
 	lastProcCPUTime cpu.TimesStat
 }
@@ -97,5 +97,5 @@ func init() {
 	c := &ProcCheck{
 		CheckBase: core.NewCheckBase("proc"),
 	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(c)
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type NetCheck struct {
-	core.CheckBase
+	name       string
 	ts         int64
 	stats      map[string]net.IOCountersStat
 	interfaces map[string]net.InterfaceStat
@@ -103,5 +103,5 @@ func init() {
 	c := &NetCheck{
 		CheckBase: core.NewCheckBase("net"),
 	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(c)
 }
