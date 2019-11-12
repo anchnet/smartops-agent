@@ -18,6 +18,10 @@ type ProcCheck struct {
 	lastProcCPUTime cpu.TimesStat
 }
 
+func (c *ProcCheck) Name() string {
+	return c.name
+}
+
 func (c *ProcCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 
@@ -94,8 +98,7 @@ func calculatePct(deltaProc, deltaTime float64) float32 {
 }
 
 func init() {
-	c := &ProcCheck{
-		CheckBase: core.NewCheckBase("proc"),
-	}
-	core.RegisterCheck(c)
+	core.RegisterCheck(&ProcCheck{
+		name: "proc",
+	})
 }

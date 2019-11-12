@@ -15,6 +15,10 @@ type MemCheck struct {
 	name string
 }
 
+func (c *MemCheck) Name() string {
+	return c.name
+}
+
 func (c *MemCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	v, err := mem.VirtualMemory()
@@ -56,8 +60,7 @@ func (c MemCheck) formatSwapMetric(name string) string {
 }
 
 func init() {
-	c := &MemCheck{
-		CheckBase: core.NewCheckBase("mem"),
-	}
-	core.RegisterCheck(c)
+	core.RegisterCheck(&MemCheck{
+		name: "mem",
+	})
 }

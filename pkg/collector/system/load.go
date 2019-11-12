@@ -14,6 +14,10 @@ type LoadCheck struct {
 	name string
 }
 
+func (c *LoadCheck) Name() string {
+	return c.name
+}
+
 func (c *LoadCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	avg, err := load.Avg()
@@ -32,8 +36,7 @@ func (c LoadCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &LoadCheck{
-		CheckBase: core.NewCheckBase("load"),
-	}
-	core.RegisterCheck(c)
+	core.RegisterCheck(&LoadCheck{
+		name: "load",
+	})
 }

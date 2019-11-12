@@ -16,6 +16,10 @@ type NetCheck struct {
 	interfaces map[string]net.InterfaceStat
 }
 
+func (c *NetCheck) Name() string {
+	return c.name
+}
+
 func (c *NetCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	ioByInterface, err := net.IOCounters(true)
@@ -100,8 +104,7 @@ func (c NetCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &NetCheck{
-		CheckBase: core.NewCheckBase("net"),
-	}
-	core.RegisterCheck(c)
+	core.RegisterCheck(&NetCheck{
+		name: "net",
+	})
 }

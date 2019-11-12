@@ -10,12 +10,14 @@ import (
 	"time"
 )
 
-var name string = "cpu"
-
 type CPUCheck struct {
 	name         string
 	lastCycle    float64
 	lastCPUTimes cpu.TimesStat
+}
+
+func (c *CPUCheck) Name() string {
+	return "cpu"
 }
 
 func (c *CPUCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -47,8 +49,7 @@ func (c CPUCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &CPUCheck{
-		name: name,
-	}
-	core.RegisterCheck(c)
+	core.RegisterCheck(&CPUCheck{
+		name: Name(),
+	})
 }

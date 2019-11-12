@@ -13,6 +13,10 @@ type DiskCheck struct {
 	name string
 }
 
+func (c *DiskCheck) Name() string {
+	return "disk"
+}
+
 func (c *DiskCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 	partitions, err := disk.Partitions(true)
@@ -71,8 +75,7 @@ func (c DiskCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &DiskCheck{
-		CheckBase: core.NewCheckBase("disk"),
-	}
-	core.RegisterCheck(c)
+	core.RegisterCheck(&DiskCheck{
+		name: "disk",
+	})
 }
