@@ -10,12 +10,12 @@ import (
 
 var ticker *time.Ticker
 
-func Run(f *forwarder.Forwarder) {
+func Run() {
 	go func() {
 		for range ticker.C {
 			hb := packet.NewPacket(packet.Heartbeat, "ping")
 			log.Info(fmt.Sprintf("Heartbeat: %s", hb))
-			f.Send(hb)
+			forwarder.Send(hb)
 		}
 	}()
 }

@@ -7,100 +7,84 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
-	"time"
 )
 
 var (
-	forwardInstance *Forwarder
-)
-
-type Forwarder struct {
-	wsInstance *websocket.Conn
+	wsConn     *websocket.Conn
 	connected  bool
 	authorized bool
-}
+)
 
-func NewForwarder() *Forwarder {
-	ws := &Forwarder{}
-	return ws
-}
-func GetForwarder() *Forwarder {
-	if forwardInstance == nil {
-		forwardInstance = NewForwarder()
-	}
-	return forwardInstance
-}
-
-func (w *Forwarder) Connect() error {
+func Connect() error {
 	var err error
-	if w.wsInstance != nil && w.connected {
+	if wsConn != nil && connected {
 		return nil
 	}
-	wsUrl := config.SmartOps.GetString("ws_site")
-	w.wsInstance, _, err = websocket.DefaultDialer.Dial(wsUrl, nil)
+	wsAddr := config.SmartOps.GetString("ws_site")
+	wsConn, _, err = websocket.DefaultDialer.Dial(wsAddr, nil)
 	if err != nil {
 		return err
 	}
-	w.connected = true
-	w.Send(packet.NewPacket(packet.Auth, config.SmartOps.GetString("api_key")))
+	connected = true
+	Send(packet.NewPacket(packet.Auth, config.SmartOps.GetString("api_key")))
 	return nil
 }
 
-func (w *Forwarder) auth(msg string, ch chan<- packet.Authorize) {
+func auth(msg string, ch chan<- packet.Authorize) {
 	var au packet.Authorize
 	_ = json.Unmarshal([]byte(msg), &au)
 	ch <- au
-	w.authorized = true
+	authorized = true
 }
-func (w *Forwarder) Stop() error {
-	if w.wsInstance != nil {
-		if err := w.wsInstance.Close(); err != nil {
+
+func Close() error {
+	if wsConn != nil {
+		if err := wsConn.Close(); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (w *Forwarder) Send(packet packet.Packet) {
+func Send(packet packet.Packet) {
+	if wsConn == nil || !connected {
+		_ = log.Warn("Connection is closed, reconnecting...")
+		err := Connect()
+		if err != nil {
+			_ = log.Errorf("Connecting error, %s.", err)
+			return
+		}
+	}
 	buffer := new(bytes.Buffer)
 	_ = json.NewEncoder(buffer).Encode(packet)
-	if w.wsInstance != nil {
-		err := w.wsInstance.WriteJSON(packet)
+	if wsConn != nil {
+		err := wsConn.WriteJSON(packet)
 		if err != nil {
-			log.Error(err)
-			w.connected = false
-			w.reconnect()
+			_ = log.Errorf("Sending message error, %s", err)
+			connected = false
 		} else {
-			log.Infof("Successfully posted payload")
+			log.Infof("Sending message success, %d bytes.", len(buffer.Bytes()))
 		}
 	}
 }
-func (w *Forwarder) Receive(ch chan<- packet.Authorize) (string, error) {
-	_, p, err := w.wsInstance.ReadMessage()
+func Receive(ch chan<- packet.Authorize) (string, error) {
+	if wsConn == nil || !connected {
+		_ = log.Warn("Connection is closed, reconnecting...")
+		err := Connect()
+		if err != nil {
+			_ = log.Errorf("Connecting error, %s.", err)
+			return "", err
+		}
+	}
+	_, p, err := wsConn.ReadMessage()
 	if err != nil {
-		log.Error(err)
-		w.connected = false
-		w.reconnect()
+		_ = log.Errorf("Reading message error, %s", err)
+		connected = false
+		return "", err
 	}
 	msg := string(p)
-	if !w.authorized {
-		w.auth(msg, ch)
+	if !authorized {
+		auth(msg, ch)
 	}
-	log.Infof("Receive message: %v", msg)
 	return msg, err
-}
-
-func (w *Forwarder) reconnect() {
-	num := 1
-	for w.connected == false {
-		if w.wsInstance != nil {
-			w.wsInstance.Close()
-		}
-		log.Infof("Reconnect... #%d", num)
-		w.Connect()
-		num++
-		time.Sleep(10 * time.Second)
-	}
-	log.Info("Reconnect successful")
-
 }
