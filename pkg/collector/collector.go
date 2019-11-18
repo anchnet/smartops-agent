@@ -3,6 +3,7 @@ package collector
 import (
 	"github.com/anchnet/smartops-agent/pkg/collector/system"
 	"github.com/anchnet/smartops-agent/pkg/sender"
+	log "github.com/cihub/seelog"
 	"time"
 )
 
@@ -13,6 +14,7 @@ func Collect() {
 	go func() {
 		for range ticker.C {
 			samples := system.Collect()
+			log.Infof("samples: %d.", len(samples))
 			//首次数据不发送
 			if first {
 				first = false

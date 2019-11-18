@@ -16,7 +16,7 @@ func Run() {
 	for {
 		select {
 		case senderMetrics := <-ms:
-			forwarder.Send(packet.NewPacket(packet.MonitorData, senderMetrics))
+			forwarder.Send(packet.NewServerPacket(packet.Monitor, senderMetrics))
 		}
 	}
 }

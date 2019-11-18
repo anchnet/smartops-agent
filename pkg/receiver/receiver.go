@@ -11,8 +11,8 @@ func Run(ch chan<- packet.Authorize) {
 		msg, err := forwarder.Receive(ch)
 		if err != nil {
 			_ = log.Error("Receiving  error, %s", err)
-		} else {
-			log.Infof("Receiving success: %s", msg)
+			continue
 		}
+		log.Infof("Receiving success: %s", msg)
 	}
 }

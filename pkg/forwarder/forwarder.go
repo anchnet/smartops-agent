@@ -10,14 +10,14 @@ import (
 )
 
 var (
-	wsConn     *websocket.Conn
-	connected  bool
-	authorized bool
+	wsConn      *websocket.Conn
+	isConnected bool
+	authorized  bool
 )
 
 func Connect() error {
 	var err error
-	if wsConn != nil && connected {
+	if wsConn != nil && isConnected {
 		return nil
 	}
 	wsAddr := config.SmartOps.GetString("ws_site")
@@ -25,16 +25,10 @@ func Connect() error {
 	if err != nil {
 		return err
 	}
-	connected = true
-	Send(packet.NewPacket(packet.Auth, config.SmartOps.GetString("api_key")))
+	wsConn.EnableWriteCompression(true)
+	isConnected = true
+	Send(packet.NewPacket(packet.Auth, packet.AuthToken{Token: config.SmartOps.GetString("api_key")}))
 	return nil
-}
-
-func auth(msg string, ch chan<- packet.Authorize) {
-	var au packet.Authorize
-	_ = json.Unmarshal([]byte(msg), &au)
-	ch <- au
-	authorized = true
 }
 
 func Close() error {
@@ -47,7 +41,7 @@ func Close() error {
 }
 
 func Send(packet packet.Packet) {
-	if wsConn == nil || !connected {
+	if wsConn == nil || !isConnected {
 		_ = log.Warn("Connection is closed, reconnecting...")
 		err := Connect()
 		if err != nil {
@@ -61,14 +55,14 @@ func Send(packet packet.Packet) {
 		err := wsConn.WriteJSON(packet)
 		if err != nil {
 			_ = log.Errorf("Sending message error, %s", err)
-			connected = false
+			isConnected = false
 		} else {
 			log.Infof("Sending message success, %d bytes.", len(buffer.Bytes()))
 		}
 	}
 }
 func Receive(ch chan<- packet.Authorize) (string, error) {
-	if wsConn == nil || !connected {
+	if wsConn == nil || !isConnected {
 		_ = log.Warn("Connection is closed, reconnecting...")
 		err := Connect()
 		if err != nil {
@@ -79,12 +73,15 @@ func Receive(ch chan<- packet.Authorize) (string, error) {
 	_, p, err := wsConn.ReadMessage()
 	if err != nil {
 		_ = log.Errorf("Reading message error, %s", err)
-		connected = false
+		isConnected = false
 		return "", err
 	}
 	msg := string(p)
 	if !authorized {
-		auth(msg, ch)
+		var au packet.Authorize
+		_ = json.Unmarshal([]byte(msg), &au)
+		ch <- au
+		authorized = true
 	}
 	return msg, err
 }

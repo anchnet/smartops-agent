@@ -116,8 +116,8 @@ func startAgent() error {
 		heartbeat.Run()
 	}()
 	auth := <-closeChan
-	if !auth.Success {
-		return fmt.Errorf(auth.Message)
+	if auth.Code != 0 {
+		return fmt.Errorf("Agent authencate failed: " + auth.Message)
 	}
 	log.Info("Start running...")
 	collector.Collect()
