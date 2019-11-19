@@ -97,7 +97,7 @@ func startAgent() error {
 
 	// setup the forwarder
 	if err := forwarder.Connect(); err != nil {
-		return fmt.Errorf("Error while sender connect, %v", err)
+		return fmt.Errorf("error while sender connect, %v", err)
 	}
 
 	// setup the sender

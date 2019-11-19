@@ -17,7 +17,6 @@ func Collect() []metric.MetricSample {
 		if s, err := c.Collect(t); err != nil {
 			_ = log.Warnf("Error while run collect %s, %v", c.Name(), err)
 		} else {
-			log.Infof("Collecting %s %d", c.Name(), len(samples))
 			samples = append(samples, s...)
 		}
 	}
