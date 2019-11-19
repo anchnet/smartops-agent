@@ -15,7 +15,11 @@ const (
 )
 
 type MemCheck struct {
-	core.CheckBase
+	name string
+}
+
+func (c *MemCheck) Name() string {
+	return c.name
 }
 
 func (c *MemCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -25,10 +29,10 @@ func (c *MemCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	if err != nil {
 		return nil, err
 	}
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "total"), float64(v.Total), metric.UnitByte, t, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "free"), float64(v.Available), metric.UnitByte, t, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "used"), float64(v.Used), metric.UnitByte, t, nil))
-	samples = append(samples, metric.NewServerMetricSample(fmt.Sprintf(memMetric, "used_pct"), v.UsedPercent, metric.UnitPercent, t, nil))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("total"), float64(v.Total), metric.UnitByte, t, nil))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("free"), float64(v.Available), metric.UnitByte, t, nil))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used"), float64(v.Used), metric.UnitByte, t, nil))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used_pct"), v.UsedPercent, metric.UnitPercent, t, nil))
 
 	return samples, nil
 }
@@ -39,8 +43,7 @@ func (c MemCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &MemCheck{
-		CheckBase: core.NewCheckBase("men"),
-	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(&MemCheck{
+		name: "mem",
+	})
 }

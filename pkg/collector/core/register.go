@@ -5,8 +5,8 @@ var (
 	checks  = make([]Check, 0)
 )
 
-func RegisterCheck(name string, c Check) {
-	catalog[name] = c
+func RegisterCheck(c Check) {
+	catalog[c.Name()] = c
 }
 func GetAllChecks() []Check {
 	if len(checks) != 0 {

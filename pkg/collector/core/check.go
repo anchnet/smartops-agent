@@ -8,5 +8,5 @@ import (
 // Check is an interface for types capable to run checks
 type Check interface {
 	Collect(t time.Time) ([]metric.MetricSample, error) // collect the metric
-	String() string                                     // provide a printable version of the check name
+	Name() string                                       // provide a printable version of the check name
 }

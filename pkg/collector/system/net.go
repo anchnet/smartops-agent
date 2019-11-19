@@ -10,10 +10,14 @@ import (
 )
 
 type NetCheck struct {
-	core.CheckBase
+	name       string
 	ts         int64
 	stats      map[string]net.IOCountersStat
 	interfaces map[string]net.InterfaceStat
+}
+
+func (c *NetCheck) Name() string {
+	return c.name
 }
 
 func (c *NetCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -100,8 +104,7 @@ func (c NetCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &NetCheck{
-		CheckBase: core.NewCheckBase("net"),
-	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(&NetCheck{
+		name: "net",
+	})
 }

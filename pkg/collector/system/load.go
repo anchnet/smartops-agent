@@ -11,7 +11,11 @@ import (
 )
 
 type LoadCheck struct {
-	core.CheckBase
+	name string
+}
+
+func (c *LoadCheck) Name() string {
+	return c.name
 }
 
 func (c *LoadCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -32,8 +36,7 @@ func (c LoadCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &LoadCheck{
-		CheckBase: core.NewCheckBase("load"),
-	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(&LoadCheck{
+		name: "load",
+	})
 }

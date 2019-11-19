@@ -5,6 +5,8 @@ import (
 	"github.com/DataDog/gopsutil/cpu"
 	"github.com/DataDog/gopsutil/process"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
+
+	//"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"github.com/shirou/gopsutil/mem"
 	"strconv"
@@ -13,9 +15,13 @@ import (
 )
 
 type ProcCheck struct {
-	core.CheckBase
+	name            string
 	lastProcs       map[int32]*process.FilledProcess
 	lastProcCPUTime cpu.TimesStat
+}
+
+func (c *ProcCheck) Name() string {
+	return c.name
 }
 
 func (c *ProcCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -94,8 +100,7 @@ func calculatePct(deltaProc, deltaTime float64) float32 {
 }
 
 func init() {
-	c := &ProcCheck{
-		CheckBase: core.NewCheckBase("proc"),
-	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(&ProcCheck{
+		name: "proc",
+	})
 }

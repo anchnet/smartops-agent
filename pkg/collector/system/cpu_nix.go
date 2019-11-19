@@ -11,9 +11,13 @@ import (
 )
 
 type CPUCheck struct {
-	core.CheckBase
+	name         string
 	lastCycle    float64
 	lastCPUTimes cpu.TimesStat
+}
+
+func (c *CPUCheck) Name() string {
+	return c.name
 }
 
 func (c *CPUCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -44,14 +48,14 @@ func (c *CPUCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	c.lastCPUTimes = cpuTimes[0]
 	return samples, nil
 }
+
 func (c CPUCheck) formatMetric(name string) string {
 	format := "system.cpu.%s"
 	return fmt.Sprintf(format, name)
 }
 
 func init() {
-	c := &CPUCheck{
-		CheckBase: core.NewCheckBase("cpu"),
-	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(&CPUCheck{
+		name: "cpu",
+	})
 }

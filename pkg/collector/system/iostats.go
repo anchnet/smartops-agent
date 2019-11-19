@@ -11,9 +11,13 @@ import (
 )
 
 type IOStatsCheck struct {
-	core.CheckBase
+	name  string
 	ts    int64
 	stats map[string]disk.IOCountersStat
+}
+
+func (c *IOStatsCheck) Name() string {
+	return c.name
 }
 
 func (c *IOStatsCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -64,8 +68,7 @@ func (c IOStatsCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &IOStatsCheck{
-		CheckBase: core.NewCheckBase("iostats"),
-	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(&IOStatsCheck{
+		name: "iostats",
+	})
 }

@@ -10,7 +10,11 @@ import (
 )
 
 type DiskCheck struct {
-	core.CheckBase
+	name string
+}
+
+func (c *DiskCheck) Name() string {
+	return "disk"
 }
 
 func (c *DiskCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -71,8 +75,7 @@ func (c DiskCheck) formatMetric(name string) string {
 }
 
 func init() {
-	c := &DiskCheck{
-		CheckBase: core.NewCheckBase("disk"),
-	}
-	core.RegisterCheck(c.String(), c)
+	core.RegisterCheck(&DiskCheck{
+		name: "disk",
+	})
 }

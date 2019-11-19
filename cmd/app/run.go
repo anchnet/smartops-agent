@@ -29,7 +29,6 @@ var (
 		Short: "Run collector",
 		RunE:  run,
 	}
-	forward *forwarder.Forwarder
 )
 
 func run(cmd *cobra.Command, args []string) error {
@@ -97,31 +96,28 @@ func startAgent() error {
 	log.Infof("pid '%d' written to pid file '%s'", os.Getpid(), common.DefaultPidFile)
 
 	// setup the forwarder
-	forward = forwarder.GetForwarder()
-	if err := forward.Connect(); err != nil {
-		return fmt.Errorf("Error while sender connect, %v", err)
+	if err := forwarder.Connect(); err != nil {
+		return fmt.Errorf("error while sender connect, %v", err)
 	}
 
 	// setup the sender
-	send := sender.GetSender()
 	go func() {
-		send.Run()
+		sender.Run()
 	}()
 
 	// setup the receiver
 	closeChan := make(chan packet.Authorize)
-	receive := receiver.GetReceiver()
 	go func() {
-		receive.Run(closeChan)
+		receiver.Run(closeChan)
 	}()
 
 	// setup heartbeat
 	go func() {
-		heartbeat.Run(forward)
+		heartbeat.Run()
 	}()
 	auth := <-closeChan
-	if !auth.Success {
-		return fmt.Errorf(auth.Message)
+	if auth.Code != 0 {
+		return fmt.Errorf("Agent authencate failed: " + auth.Message)
 	}
 	log.Info("Start running...")
 	collector.Collect()
@@ -129,10 +125,9 @@ func startAgent() error {
 }
 
 func stopAgent() {
-	os.Remove(common.DefaultPidFile)
-	if forward != nil {
-		if err := forward.Stop(); err != nil {
-			log.Errorf("Error while stop agent, %v", err)
-		}
+	log.Infof("Stoping agent...")
+	_ = os.Remove(common.DefaultPidFile)
+	if err := forwarder.Close(); err != nil {
+		_ = log.Errorf("Error while closing connection, %v", err)
 	}
 }
