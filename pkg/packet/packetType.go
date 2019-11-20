@@ -1,7 +1,7 @@
 package packet
 
 const (
-	Auth      = "auth"
+	APIKey    = "auth"
 	Monitor   = "monitor"
 	Heartbeat = "heartbeat"
 )

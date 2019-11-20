@@ -24,7 +24,7 @@ func init() {
 // initConfig initializes the config defaults on a config
 func initConfig(config Config) {
 	// Agent
-	config.SetDefault("ws_site", defaultWsSite)
+	config.SetDefault("ws_url", defaultWsSite)
 	config.BindEnvAndSetDefault("endpoint", nil)
 	config.BindEnvAndSetDefault("api_key", nil)
 

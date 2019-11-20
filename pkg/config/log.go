@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-	//"github.com/anchnet/smartops-agent/pkg/util/log"
-	//log "github.com/cihub/seelog"
 	"strings"
 
 	"github.com/cihub/seelog"

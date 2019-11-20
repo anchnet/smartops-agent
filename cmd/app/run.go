@@ -6,11 +6,7 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/collector"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
-	"github.com/anchnet/smartops-agent/pkg/heartbeat"
-	"github.com/anchnet/smartops-agent/pkg/packet"
 	"github.com/anchnet/smartops-agent/pkg/pidfile"
-	"github.com/anchnet/smartops-agent/pkg/receiver"
-	"github.com/anchnet/smartops-agent/pkg/sender"
 	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
 	"os"
@@ -55,9 +51,10 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 }
+
 func startAgent() error {
 	if err := common.SetupConfig(confFilePath); err != nil {
-		log.Errorf("Failed to setup config %v", err)
+		_ = log.Errorf("Failed to setup config %v", err)
 		return fmt.Errorf("ubable to set agent configuration: %v", err)
 	}
 	logFile := config.SmartOps.GetString("log_file")
@@ -96,38 +93,21 @@ func startAgent() error {
 	log.Infof("pid '%d' written to pid file '%s'", os.Getpid(), common.DefaultPidFile)
 
 	// setup the forwarder
-	if err := forwarder.Connect(); err != nil {
-		return fmt.Errorf("error while sender connect, %v", err)
+	if err := forwarder.GetDefaultForwarder().Start(); err != nil {
+		return log.Errorf("error start forwarder: %v", err)
 	}
 
-	// setup the sender
-	go func() {
-		sender.Run()
-	}()
-
-	// setup the receiver
-	closeChan := make(chan packet.Authorize)
-	go func() {
-		receiver.Run(closeChan)
-	}()
-
-	// setup heartbeat
-	go func() {
-		heartbeat.Run()
-	}()
-	auth := <-closeChan
-	if auth.Code != 0 {
-		return fmt.Errorf("Agent authencate failed: " + auth.Message)
-	}
+	// setup the collector
+	go collector.Collect()
 	log.Info("Start running...")
-	collector.Collect()
 	return nil
 }
 
 func stopAgent() {
-	log.Infof("Stoping agent...")
+	log.Info("Stopping agent...")
 	_ = os.Remove(common.DefaultPidFile)
-	if err := forwarder.Close(); err != nil {
-		_ = log.Errorf("Error while closing connection, %v", err)
+	collector.Stop()
+	if err := forwarder.GetDefaultForwarder().Stop(); err != nil {
+		_ = log.Errorf("error while closing connection, %v", err)
 	}
 }
