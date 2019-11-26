@@ -179,7 +179,7 @@ func (f *defaultForwarder) receiveLoop() {
 	for {
 		response := new(packet.WsResponse)
 		err := f.wsConn.ReadJSON(response)
-		if err != nil && f.state == STARTED {
+		if err != nil {
 			f.connected = false
 			f.reconnect <- true
 			_ = log.Errorf("receiving message error: %v", err)
@@ -190,7 +190,7 @@ func (f *defaultForwarder) receiveLoop() {
 				time.Sleep(30 * time.Second)
 			}
 		} else {
-			log.Infof("Message received: %s", response)
+			log.Infof("Message received: %s", response.String())
 			if response.Type == "auth" {
 				if response.Code == RESPONSE_SUCCESS {
 					log.Info("Agent authenticate success.")

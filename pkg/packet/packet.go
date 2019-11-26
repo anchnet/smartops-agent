@@ -41,6 +41,6 @@ func NewServerPacket(data interface{}) Packet {
 	return Packet{Endpoint: config.SmartOps.GetString("endpoint") + "_server", Type: Monitor, Data: data, Time: time.Now()}
 }
 
-func (wr *WsResponse) ToString() string {
-	return fmt.Sprintf("type: %s, code: %s, content: %s", wr.Type, wr.Code, wr.Content)
+func (wr *WsResponse) String() string {
+	return fmt.Sprintf("type: %s, code: %s, content: %s", wr.Type, fmt.Sprint(wr.Code), wr.Content)
 }
