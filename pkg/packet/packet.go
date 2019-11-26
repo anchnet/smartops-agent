@@ -3,6 +3,7 @@ package packet
 import (
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/config"
+	"github.com/anchnet/smartops-agent/pkg/util"
 	"time"
 )
 
@@ -18,7 +19,8 @@ type AuthToken struct {
 }
 
 type HeartbeatPack struct {
-	Message string `json:"message"`
+	Message string   `json:"message"`
+	IPsv4   []string `json:"ipsv4"`
 }
 
 type WsResponse struct {
@@ -32,7 +34,8 @@ func NewAPIKeyPacket() Packet {
 	return Packet{Endpoint: config.SmartOps.GetString("endpoint"), Type: APIKey, Data: &AuthToken{Token: apiKey}, Time: time.Now()}
 }
 func NewHeartbeatPacket() Packet {
-	return Packet{Endpoint: config.SmartOps.GetString("endpoint"), Type: Heartbeat, Data: &HeartbeatPack{Message: "ping"}, Time: time.Now()}
+	ipsv4, _ := util.LocalIPv4()
+	return Packet{Endpoint: config.SmartOps.GetString("endpoint"), Type: Heartbeat, Data: &HeartbeatPack{Message: "ping", IPsv4: ipsv4}, Time: time.Now()}
 }
 func NewServerPacket(data interface{}) Packet {
 	return Packet{Endpoint: config.SmartOps.GetString("endpoint") + "_server", Type: Monitor, Data: data, Time: time.Now()}
