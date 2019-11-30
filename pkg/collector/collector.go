@@ -22,8 +22,10 @@ func Collect() {
 				first = false
 				continue
 			}
-			log.Infof("Sending server metric samples: %d", cap(samples))
-			forwarder.GetDefaultForwarder().SendMessage(packet.NewServerPacket(samples))
+			if forwarder.GetDefaultForwarder().Connected() {
+				log.Infof("Sending server metric samples: %d", cap(samples))
+				forwarder.GetDefaultForwarder().SendMessage(packet.NewServerPacket(samples))
+			}
 		case <-stopCh:
 			return
 		}

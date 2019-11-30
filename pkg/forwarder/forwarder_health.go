@@ -12,7 +12,7 @@ import (
 )
 
 type forwarderHealth struct {
-	f       defaultForwarder
+	f       *defaultForwarder
 	stop    chan bool
 	stopped chan struct{}
 	apiKey  string
@@ -49,8 +49,10 @@ func (fh *forwarderHealth) healthCheckLoop() {
 		case <-fh.stop:
 			return
 		case <-healthCheckTicker.C:
-			log.Info("Sending heart beat...")
-			GetDefaultForwarder().SendMessage(packet.NewHeartbeatPacket())
+			if fh.f.connected {
+				log.Info("Sending heart beat...")
+				GetDefaultForwarder().SendMessage(packet.NewHeartbeatPacket())
+			}
 		}
 	}
 }

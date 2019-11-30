@@ -24,9 +24,9 @@ type HeartbeatPack struct {
 }
 
 type WsResponse struct {
-	Type    string `json:"type"`
-	Code    int32  `json:"code"`
-	Content string `json:"content"`
+	Type string      `json:"type"`
+	Code int32       `json:"code"`
+	Body interface{} `json:"body"`
 }
 
 func NewAPIKeyPacket() Packet {
@@ -42,5 +42,5 @@ func NewServerPacket(data interface{}) Packet {
 }
 
 func (wr *WsResponse) String() string {
-	return fmt.Sprintf("type: %s, code: %s, content: %s", wr.Type, fmt.Sprint(wr.Code), wr.Content)
+	return fmt.Sprintf("type: %s, code: %s, content: %s", wr.Type, fmt.Sprint(wr.Code), wr.Body)
 }

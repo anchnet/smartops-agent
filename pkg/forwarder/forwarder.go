@@ -40,8 +40,8 @@ type defaultForwarder struct {
 	reconnect     chan bool
 	stop          chan bool
 	stopped       chan struct{}
-	authenticated chan bool
-	retryCount    int32
+	//authenticated chan bool
+	retryCount int32
 }
 
 func newDefaultForwarder() *defaultForwarder {
@@ -53,39 +53,50 @@ func newDefaultForwarder() *defaultForwarder {
 			stop:    make(chan bool, 1),
 			stopped: make(chan struct{}),
 		},
-		messageCh:     make(chan packet.Packet),
-		reconnect:     make(chan bool, 1),
-		stop:          make(chan bool, 1),
-		stopped:       make(chan struct{}),
-		authenticated: make(chan bool, 1),
+		messageCh: make(chan packet.Packet),
+		reconnect: make(chan bool, 1),
+		stop:      make(chan bool, 1),
+		stopped:   make(chan struct{}),
+		//authenticated: make(chan bool, 1),
 	}
 }
 
 func GetDefaultForwarder() *defaultForwarder {
 	forwarderInit.Do(func() {
 		forwarderInstance = newDefaultForwarder()
-		forwarderInstance.healthChecker.f = *forwarderInstance
+		forwarderInstance.healthChecker.f = forwarderInstance
 	})
 	return forwarderInstance
 }
+func (f *defaultForwarder) Connected() bool {
+	return f.connected
+}
 
 func (f *defaultForwarder) connect() error {
-	if f.wsConn != nil && f.state == STARTED {
-		err := f.wsConn.WriteMessage(websocket.TextMessage, []byte("ping"))
-		if err == nil {
-			return nil
-		}
-	}
-	f.retryCount++
+	//if f.wsConn != nil && f.state == STARTED {
+	//	err := f.wsConn.WriteMessage(websocket.TextMessage, []byte("ping"))
+	//	if err == nil {
+	//		f.connected = true
+	//		log.Info("Connection is ok.")
+	//		return nil
+	//	}
+	//}
 	log.Infof("Connecting to %v #%d", f.wsAddr, f.retryCount)
+	f.retryCount++
 	conn, _, err := websocket.DefaultDialer.Dial(f.wsAddr, nil)
 	if err != nil {
 		f.connected = false
 		return err
 	}
+	log.Info("Connected.")
 	conn.EnableWriteCompression(true)
 	f.wsConn = conn
 	f.connected = true
+	log.Info("Sending api key ...")
+	_ = f.sendMessage(packet.NewAPIKeyPacket())
+	//if err != nil {
+	//	f.authenticated <- false
+	//}
 	return nil
 }
 
@@ -103,16 +114,16 @@ func (f *defaultForwarder) Start() error {
 	}
 	f.state = STARTED
 
-	log.Info("Sending api key packet and waiting for response...")
-	err := f.sendMessage(packet.NewAPIKeyPacket())
-	if err != nil {
-		return log.Errorf("sending api key packet error: %v", err)
-	}
+	//log.Info("Sending api key packet and waiting for response...")
+	//err := f.sendMessage(packet.NewAPIKeyPacket())
+	//if err != nil {
+	//	return log.Errorf("sending api key packet error: %v", err)
+	//}
 	go f.receiveLoop()
-	if <-f.authenticated == false {
-		return log.Errorf("api key authenticate error")
-	}
-	log.Info("API key authenticated success.")
+	//if <-f.authenticated == false {
+	//	return log.Errorf("api key authenticate error")
+	//}
+	//log.Info("API key authenticated success.")
 	f.healthChecker.Start()
 	go f.sendingLoop()
 
@@ -155,16 +166,21 @@ func (f *defaultForwarder) sendingLoop() {
 	for {
 		select {
 		case <-f.reconnect:
-			if err := f.connect(); err != nil {
-				time.Sleep(30 * time.Second)
+			log.Info("Reconnecting...")
+			err := f.connect()
+			if err != nil {
+				_ = log.Errorf("connecting error, %v", err)
+				time.Sleep(5 * time.Second)
 				f.reconnect <- true
+			} else {
+				f.retryCount = 0
 			}
 		case pack := <-f.messageCh:
 			if f.connected {
 				if err := f.sendMessage(pack); err != nil {
 					f.connected = false
-					f.reconnect <- true
 					_ = log.Errorf("sending '%s' message error: %v", pack.Type, err)
+					f.reconnect <- true
 				}
 			}
 		case <-f.stop:
@@ -180,25 +196,39 @@ func (f *defaultForwarder) receiveLoop() {
 		response := new(packet.WsResponse)
 		err := f.wsConn.ReadJSON(response)
 		if err != nil {
-			f.connected = false
-			f.reconnect <- true
-			_ = log.Errorf("receiving message error: %v", err)
-			var checkCount = 0
-			for !f.connected {
-				checkCount++
-				log.Infof("Checking is connection recovery...#d", checkCount)
-				time.Sleep(30 * time.Second)
+			switch err.(type) {
+			case *websocket.CloseError:
+				f.connected = false
+				_ = log.Errorf("receiving message error: %v", err)
+				f.reconnect <- true
+				for !f.connected {
+					time.Sleep(10 * time.Second)
+					log.Infof("Check connection state: %v", f.connected)
+				}
+				break
+			case *json.UnmarshalTypeError:
+				_ = log.Error("message convert to json error: %e", err)
+				break
 			}
+
 		} else {
 			log.Infof("Message received: %s", response.String())
 			if response.Type == "auth" {
 				if response.Code == RESPONSE_SUCCESS {
 					log.Info("Agent authenticate success.")
-					f.authenticated <- true
+					//f.authenticated <- true
 				} else {
-					f.authenticated <- false
-					_ = log.Errorf("Agent authenticate error: %s", response.Content)
+					//f.authenticated <- false
+					_ = log.Errorf("Agent authenticate error: %s", response.Body)
 				}
+			} else if response.Type == "task" {
+				bytes, _ := json.Marshal(response.Body)
+				var task packet.Task
+				err = json.Unmarshal(bytes, &task)
+				if err != nil {
+					_ = log.Error(err)
+				}
+				log.Info("task.id: " + task.Id)
 			}
 		}
 	}
