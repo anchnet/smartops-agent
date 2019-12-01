@@ -35,21 +35,17 @@ func run(cmd *cobra.Command, args []string) error {
 	signal.Notify(signalOS, os.Interrupt, syscall.SIGTERM)
 	signalStop := make(chan error)
 	go func() {
-		select {
-		case sig := <-signalOS:
-			log.Infof("Received signal '%s', shutting down...", sig)
-			signalStop <- nil
-		}
+		sig := <-signalOS
+		log.Infof("Receive signal '%s', shutting down...", sig)
+		signalStop <- nil
 	}()
 
 	if err := startAgent(); err != nil {
 		return err
 	}
 
-	select {
-	case err := <-signalStop:
-		return err
-	}
+	err := <-signalStop
+	return err
 }
 
 func startAgent() error {

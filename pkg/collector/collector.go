@@ -4,7 +4,6 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/collector/system"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/packet"
-	log "github.com/cihub/seelog"
 	"time"
 )
 
@@ -23,7 +22,7 @@ func Collect() {
 				continue
 			}
 			if forwarder.GetDefaultForwarder().Connected() {
-				log.Infof("Sending server metric samples: %d", cap(samples))
+				//log.Infof("Sending server metric samples: %d", cap(samples))
 				forwarder.GetDefaultForwarder().SendMessage(packet.NewServerPacket(samples))
 			}
 		case <-stopCh:

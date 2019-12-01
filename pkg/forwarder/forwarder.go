@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/anchnet/smartops-agent/pkg/config"
+	"github.com/anchnet/smartops-agent/pkg/executor"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
+	"strings"
 	"sync"
 	"time"
 )
@@ -114,19 +116,9 @@ func (f *defaultForwarder) Start() error {
 	}
 	f.state = STARTED
 
-	//log.Info("Sending api key packet and waiting for response...")
-	//err := f.sendMessage(packet.NewAPIKeyPacket())
-	//if err != nil {
-	//	return log.Errorf("sending api key packet error: %v", err)
-	//}
 	go f.receiveLoop()
-	//if <-f.authenticated == false {
-	//	return log.Errorf("api key authenticate error")
-	//}
-	//log.Info("API key authenticated success.")
 	f.healthChecker.Start()
 	go f.sendingLoop()
-
 	return nil
 }
 
@@ -203,7 +195,7 @@ func (f *defaultForwarder) receiveLoop() {
 				f.reconnect <- true
 				for !f.connected {
 					time.Sleep(10 * time.Second)
-					log.Infof("Check connection state: %v", f.connected)
+					log.Infof("Checking connection state: %v", f.connected)
 				}
 				break
 			case *json.UnmarshalTypeError:
@@ -214,21 +206,33 @@ func (f *defaultForwarder) receiveLoop() {
 		} else {
 			log.Infof("Message received: %s", response.String())
 			if response.Type == "auth" {
-				if response.Code == RESPONSE_SUCCESS {
-					log.Info("Agent authenticate success.")
-					//f.authenticated <- true
-				} else {
-					//f.authenticated <- false
+				if response.Code != RESPONSE_SUCCESS {
 					_ = log.Errorf("Agent authenticate error: %s", response.Body)
 				}
 			} else if response.Type == "task" {
-				bytes, _ := json.Marshal(response.Body)
+				body, _ := json.Marshal(response.Body)
 				var task packet.Task
-				err = json.Unmarshal(bytes, &task)
+				err = json.Unmarshal(body, &task)
 				if err != nil {
 					_ = log.Error(err)
 				}
-				log.Info("task.id: " + task.Id)
+				log.Info("task: " + task.String())
+				switch task.Type {
+				case "adhoc_command":
+					output, _ := executor.RunCommand(task.Content.(string))
+					lines := strings.Split(output, "\n")
+					for _, line := range lines {
+						f.SendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+							TaskId: task.Id,
+							Output: line,
+						}))
+					}
+					f.SendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+						TaskId: task.Id,
+						Output: "EOF",
+					}))
+
+				}
 			}
 		}
 	}

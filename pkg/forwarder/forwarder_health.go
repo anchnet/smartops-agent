@@ -38,19 +38,13 @@ func (fh *forwarderHealth) healthCheckLoop() {
 	defer healthCheckTicker.Stop()
 	defer close(fh.stopped)
 
-	//valid, err := fh.validateAPIKey()
-	//if !valid {
-	//	_ = log.Errorf("No valid api key found, forwarder is unhealthy, %v", err)
-	//	return
-	//}
-
 	for {
 		select {
 		case <-fh.stop:
 			return
 		case <-healthCheckTicker.C:
 			if fh.f.connected {
-				log.Info("Sending heart beat...")
+				//log.Info("Sending heart beat...")
 				GetDefaultForwarder().SendMessage(packet.NewHeartbeatPacket())
 			}
 		}
