@@ -50,6 +50,6 @@ func (c CPUCheck) formatMetric(name string) string {
 
 func init() {
 	core.RegisterCheck(&CPUCheck{
-		name: Name(),
+		name: "cpu",
 	})
 }
