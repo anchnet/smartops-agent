@@ -55,9 +55,9 @@ func (c *ProcCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 
 			cpuUsage, cpuUser, cpuSys := formatCPU(p.CpuTime, c.lastProcs[p.Pid].CpuTime, cpuTimes[0], c.lastProcCPUTime)
 
-			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.usage"), float64(cpuUsage), metric.UnitByte, t, tag))
-			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.user"), float64(cpuUser), metric.UnitByte, t, tag))
-			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.system"), float64(cpuSys), metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.usage"), float64(cpuUsage), metric.UnitPercent, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.user"), float64(cpuUser), metric.UnitPercent, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("cpu.system"), float64(cpuSys), metric.UnitPercent, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.rss"), float64(p.MemInfo.RSS), metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.vms"), float64(p.MemInfo.VMS), metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("mem.pct"), float64(p.MemInfo.VMS/totalMem*100), metric.UnitPercent, t, tag))
