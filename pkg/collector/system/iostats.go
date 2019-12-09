@@ -50,8 +50,8 @@ func (c *IOStatsCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 			wCount := float64(ioStats.WriteCount - lastIOStats.WriteCount)
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.read"), rBytes, metric.UnitByte, t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.write"), wBytes, metric.UnitByte, t, tag))
-			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.read.sec"), rBytes/delta, metric.UnitByte, t, tag))
-			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.write.sec"), wBytes/delta, metric.UnitByte, t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.read.sec"), rBytes/delta, "", t, tag))
+			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("byte.write.sec"), wBytes/delta, "", t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("read.count"), rCount, "", t, tag))
 			samples = append(samples, metric.NewServerMetricSample(c.formatMetric("write.count"), wCount, "", t, tag))
 		}
