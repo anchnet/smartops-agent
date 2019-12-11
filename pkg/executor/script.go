@@ -80,6 +80,7 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 			TaskId: task.Id,
 			Output: line,
+			Code:   nil,
 		}))
 	}
 	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{

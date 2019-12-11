@@ -37,6 +37,7 @@ func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 			TaskId: task.Id,
 			Output: line,
+			Code:   nil,
 		}))
 	}
 	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{

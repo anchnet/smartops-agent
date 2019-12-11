@@ -1,7 +1,6 @@
 package packet
 
 import (
-	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"github.com/anchnet/smartops-agent/pkg/util"
@@ -58,7 +57,6 @@ func NewServerPacket(data []metric.MetricSample) Packet {
 }
 
 func NewTaskResultPacket(data TaskResult) Packet {
-	fmt.Println(data.Output + "," + string(data.Code))
 	return Packet{
 		Endpoint: config.SmartOps.GetString("endpoint"),
 		Type:     "task",
