@@ -8,7 +8,6 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
-	"strings"
 	"sync"
 	"time"
 )
@@ -148,7 +147,7 @@ func (f *defaultForwarder) sendMessage(p packet.Packet) error {
 	if err != nil {
 		return err
 	}
-	log.Infof("Sending message success, type: %v, length: %d.", p.Type, buffer.Len())
+	log.Debugf("Sending message success, type: %v, length: %d.", p.Type, buffer.Len())
 	return nil
 }
 
@@ -204,7 +203,7 @@ func (f *defaultForwarder) receiveLoop() {
 			}
 
 		} else {
-			log.Infof("Message received: %s", response.String())
+			log.Debugf("Message received: %s", response.String())
 			if response.Type == "auth" {
 				if response.Code != RESPONSE_SUCCESS {
 					_ = log.Errorf("Agent authenticate error: %s", response.Body)
@@ -219,19 +218,9 @@ func (f *defaultForwarder) receiveLoop() {
 				log.Info("task: " + task.String())
 				switch task.Type {
 				case "adhoc_command":
-					output, _ := executor.RunCommand(task.Content.(string))
-					lines := strings.Split(output, "\n")
-					for _, line := range lines {
-						f.SendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-							TaskId: task.Id,
-							Output: line,
-						}))
-					}
-					f.SendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-						TaskId: task.Id,
-						Output: "EOF",
-					}))
-
+					go executor.ExecCommand(task, f.SendMessage)
+				case "adhoc_script":
+					go executor.RunScript(task, f.SendMessage)
 				}
 			}
 		}
