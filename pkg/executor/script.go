@@ -1,8 +1,7 @@
 package executor
 
 import (
-	"bytes"
-	"encoding/gob"
+	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	"github.com/cihub/seelog"
 	"io/ioutil"
@@ -20,34 +19,8 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		}))
 		return
 	}
-	var buf bytes.Buffer
-	err := gob.NewEncoder(&buf).Encode(task.Content)
-	if err != nil {
-		_ = seelog.Errorf("encode task content error, %v", err)
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			TaskId: task.Id,
-			Output: err.Error(),
-			Code:   contentEncodeError,
-		}))
-		return
-	}
-	file, err := ioutil.TempFile("/tmp/smartops-agent/var/run/", task.Id+"_*.sh")
-	if err != nil {
-		_ = seelog.Errorf("create script file error, %v", err)
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			TaskId: task.Id,
-			Output: err.Error(),
-			Code:   createFileError,
-		}))
-		return
-	}
-	defer func() {
-		err = os.Remove(file.Name())
-		if err != nil {
-			_ = seelog.Errorf("remove file %s error, %v", file.Name(), err)
-		}
-	}()
-	err = ioutil.WriteFile(file.Name(), buf.Bytes(), 0644)
+	file := fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
+	err := ioutil.WriteFile(file, []byte(task.Content.(string)), 0744)
 	if err != nil {
 		_ = seelog.Errorf("save script content to file %s error, %v", file, err)
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
@@ -57,7 +30,22 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		}))
 		return
 	}
-	out, err := exec.Command(file.Name()).Output()
+	defer func() {
+		//err = os.Remove(file.Name())
+		//if err != nil {
+		//	_ = seelog.Errorf("remove file %s error, %v", file.Name(), err)
+		//}
+	}()
+	err = exec.Command("chmod", "+x", file).Run()
+	if err != nil {
+		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+			TaskId: task.Id,
+			Output: "update file permission error",
+			Code:   unknownError,
+		}))
+		return
+	}
+	out, err := exec.Command("/bin/bash", file).Output()
 	if err != nil {
 		result := packet.TaskResult{
 			TaskId: task.Id,
@@ -70,6 +58,8 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		case *exec.Error:
 			result.Code = unknownError
 			result.Output = e.Error()
+		case *os.PathError:
+			fmt.Println(e.Err)
 		}
 		sendMessage(packet.NewTaskResultPacket(result))
 		_ = seelog.Errorf("run cmd error,%v", err)
@@ -87,4 +77,5 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		Output:    "SUCCESS",
 		Completed: true,
 	}))
+	seelog.Infof("Task %s completed.", task.Id)
 }
