@@ -11,13 +11,6 @@ import (
 	"strings"
 )
 
-const (
-	contentEmptyError  = -2
-	contentEncodeError = -3
-	createFileError    = -4
-	saveContentError   = -5
-)
-
 func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 	if task.Content == nil || strings.Trim(task.Content.(string), "") == "" {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
@@ -66,13 +59,20 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 	}
 	out, err := exec.Command(file.Name()).Output()
 	if err != nil {
-		e := err.(*exec.ExitError)
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+		result := packet.TaskResult{
 			TaskId: task.Id,
-			Output: string(e.Stderr),
-			Code:   e.ExitCode(),
-		}))
-		_ = seelog.Errorf("run script %s error, %v", file.Name(), e)
+		}
+		switch e := err.(type) {
+		case *exec.ExitError:
+			result.Code = e.ExitCode()
+			result.Output = string(e.Stderr)
+			break
+		case *exec.Error:
+			result.Code = unknownError
+			result.Output = e.Error()
+		}
+		sendMessage(packet.NewTaskResultPacket(result))
+		_ = seelog.Errorf("run cmd error,%v", err)
 		return
 	}
 	lines := strings.Split(string(out), "\n")
@@ -80,12 +80,11 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 			TaskId: task.Id,
 			Output: line,
-			Code:   nil,
 		}))
 	}
 	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-		TaskId: task.Id,
-		Output: "success",
-		Code:   SUCCESS,
+		TaskId:    task.Id,
+		Output:    "SUCCESS",
+		Completed: true,
 	}))
 }

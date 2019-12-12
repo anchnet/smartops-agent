@@ -24,9 +24,10 @@ type HeartbeatPack struct {
 }
 
 type TaskResult struct {
-	TaskId string `json:"task_id"`
-	Output string `json:"output"`
-	Code   int    `json:"code"`
+	TaskId    string `json:"task_id"`
+	Output    string `json:"output"`
+	Code      int    `json:"code"`
+	Completed bool   `json:"completed"`
 }
 
 func NewAPIKeyPacket() Packet {

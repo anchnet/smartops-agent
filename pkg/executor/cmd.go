@@ -7,15 +7,12 @@ import (
 	"strings"
 )
 
-const SUCCESS int = 0
-const DefaultError int = -1
-
 func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
-	if task.Content == nil || strings.Trim(task.Content.(string), "") == "" {
+	if task.Content == nil || strings.Trim(task.Content.(string), " ") == "" {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 			TaskId: task.Id,
 			Output: "task content is empty",
-			Code:   DefaultError,
+			Code:   contentEmptyError,
 		}))
 		return
 	}
@@ -23,13 +20,20 @@ func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 	lines := strings.Split(cnt, "\n")
 	out, err := exec.Command(lines[0]).Output()
 	if err != nil {
-		e := err.(*exec.ExitError)
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+		result := packet.TaskResult{
 			TaskId: task.Id,
-			Output: string(e.Stderr),
-			Code:   e.ExitCode(),
-		}))
-		_ = seelog.Errorf("run cmd error,%v", e)
+		}
+		switch e := err.(type) {
+		case *exec.ExitError:
+			result.Code = e.ExitCode()
+			result.Output = string(e.Stderr)
+			break
+		default:
+			result.Code = unknownError
+			result.Output = e.Error()
+		}
+		sendMessage(packet.NewTaskResultPacket(result))
+		_ = seelog.Errorf("run cmd error,%v", err)
 		return
 	}
 	lines = strings.Split(string(out), "\n")
@@ -37,12 +41,11 @@ func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 			TaskId: task.Id,
 			Output: line,
-			Code:   nil,
 		}))
 	}
 	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-		TaskId: task.Id,
-		Output: "success",
-		Code:   SUCCESS,
+		TaskId:    task.Id,
+		Output:    "success",
+		Completed: true,
 	}))
 }
