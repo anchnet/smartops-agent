@@ -17,8 +17,13 @@ const (
 	STOPPED uint32 = iota
 	//	represent the state of an started Forwarder.
 	STARTED
-	RESPONSE_SUCCESS = 0
-	RESPONSE_ERROR   = 1
+	RESPONSE_SUCCESS   = 0
+	RESPONSE_ERROR     = 1
+	execAdHocCommand   = "adhoc_command"
+	execAdHocScript    = "adhoc_script"
+	execJobRunScript   = "job_run_script"
+	execJobSchedule    = "job_schedule"
+	execAgentUninstall = "agent_uninstall"
 )
 
 const (
@@ -217,9 +222,11 @@ func (f *defaultForwarder) receiveLoop() {
 				}
 				log.Info("New task, " + task.String())
 				switch task.Type {
-				case "adhoc_command":
+				case execAdHocCommand:
 					go executor.ExecCommand(task, f.SendMessage)
-				case "adhoc_script":
+				case execAdHocScript:
+					go executor.RunScript(task, f.SendMessage)
+				case execJobRunScript:
 					go executor.RunScript(task, f.SendMessage)
 				}
 			}
