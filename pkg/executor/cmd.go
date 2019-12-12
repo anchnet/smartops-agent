@@ -17,8 +17,8 @@ func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 		return
 	}
 	cnt := task.Content.(string)
-	lines := strings.Split(cnt, "\n")
-	out, err := exec.Command(lines[0]).Output()
+	cmdLine := strings.Split(cnt, "\n")[0]
+	out, err := exec.Command("/bin/bash", "-c", cmdLine).Output()
 	if err != nil {
 		result := packet.TaskResult{
 			TaskId: task.Id,
@@ -36,8 +36,8 @@ func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 		_ = seelog.Errorf("run cmd error,%v", err)
 		return
 	}
-	lines = strings.Split(string(out), "\n")
-	for _, line := range lines {
+	outLines := strings.Split(string(out), "\n")
+	for _, line := range outLines {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 			TaskId: task.Id,
 			Output: line,
@@ -45,7 +45,7 @@ func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 	}
 	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 		TaskId:    task.Id,
-		Output:    "success",
 		Completed: true,
 	}))
+	seelog.Infof("Task %s completed.", task.Id)
 }

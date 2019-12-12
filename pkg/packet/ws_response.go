@@ -14,7 +14,7 @@ func (wr *WsResponse) String() string {
 
 type Task struct {
 	Id      string      `json:"id"`
-	NodeId  string      `json:"node_id"`
+	NodeId  string      `json:"nodeId"`
 	Type    string      `json:"type"`
 	Content interface{} `json:"content"`
 }

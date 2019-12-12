@@ -215,7 +215,7 @@ func (f *defaultForwarder) receiveLoop() {
 				if err != nil {
 					_ = log.Error(err)
 				}
-				log.Info("task: " + task.String())
+				log.Info("New task, " + task.String())
 				switch task.Type {
 				case "adhoc_command":
 					go executor.ExecCommand(task, f.SendMessage)
