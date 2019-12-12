@@ -88,6 +88,14 @@ func startAgent() error {
 	}
 	log.Infof("pid '%d' written to pid file '%s'", os.Getpid(), common.DefaultPidFile)
 
+	// cache dir
+	cacheDir := filepath.Dir(common.DefaultCacheDir)
+	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(cacheDir, os.ModePerm); err != nil {
+			return fmt.Errorf("create cache dir error, %v", err)
+		}
+	}
+
 	// setup the forwarder
 	if err := forwarder.GetDefaultForwarder().Start(); err != nil {
 		return log.Errorf("error start forwarder: %v", err)

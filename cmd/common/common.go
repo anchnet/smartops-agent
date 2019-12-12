@@ -22,4 +22,6 @@ const (
 	DefaultUpstartPath = "/etc/init/smartops-agent.conf"
 	// Default pid file
 	DefaultPidFile = "var/run/agent.pid"
+	// Cache dir
+	DefaultCacheDir = "var/cache/"
 )
