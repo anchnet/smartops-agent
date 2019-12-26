@@ -3,7 +3,6 @@ package system
 import (
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
-	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +12,9 @@ import (
 )
 
 type NginxCheck struct {
-	name string
+	name     string
+	ngxPort  string
+	ngxRoute string
 }
 
 type NgxData struct {
@@ -26,13 +27,17 @@ type NgxData struct {
 	waiting     int
 }
 
-var ngxPort = config.SmartOps.GetString("nginx_port")
-var ngxRoute = config.SmartOps.GetString("nginx_route")
-
+func (c NginxCheck) newNgx() *NginxCheck {
+	return &NginxCheck{
+		name: "",
+		//ngxPort:  config.SmartOps.GetString("nginx_port"),
+		//ngxRoute: config.SmartOps.GetString("nginx_route"),
+	}
+}
 func (c *NginxCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
-	if ngxRoute == "" || ngxPort == "" {
-		return samples, nil
+	if c.ngxRoute == "" || c.ngxPort == "" {
+		return nil, nil
 	}
 	data, err := c.getNgxMonitorData()
 	if err != nil {
@@ -59,7 +64,7 @@ func (c *NginxCheck) Name() string {
 }
 
 func (c *NginxCheck) getNgxMonitorData() (NgxData, error) {
-	url := formatUrl(ngxPort, ngxRoute)
+	url := formatUrl(c.ngxPort, c.ngxRoute)
 	resp, err := http.Get(url)
 	var ngxData NgxData
 	if err != nil {
@@ -90,7 +95,6 @@ func (c *NginxCheck) formatResponse(statData string) (int, int, int, int, int, i
 		tmpConnections, _ := strconv.Atoi(matched[0][1])
 		connections = tmpConnections
 	}
-	fmt.Println()
 	re = regexp.MustCompile(`(\d+)\s+(\d+)\s+(\d+)`)
 	matched = re.FindAllStringSubmatch(statData, -1)
 	accepts, _ := strconv.Atoi(matched[0][1])
@@ -116,7 +120,8 @@ func (c *NginxCheck) formatMetric(metricName string) string {
 }
 
 func init() {
-	core.RegisterCheck(&NetCheck{
+	//config.SmartOps.GetString("nginx_port")
+	core.RegisterCheck(&NginxCheck{
 		name: "nginx",
 	})
 }

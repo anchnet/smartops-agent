@@ -1,3 +1,6 @@
-endpoint: <endpoing>
-api_key: <api_key>
+endpoint:  5df0d53bd2c77616c25e5547
+api_key: f5235614-637d-4f51-a8c7-3cb44bc49f99
 log_level: info
+nginx_port: 8888
+nginx_route: /nginx_status
+ws_url: wss://devtransfer.smartops.anchnet.com/ws
