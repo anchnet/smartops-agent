@@ -7,6 +7,8 @@ import (
 const (
 	UnitPercent = "%"
 	UnitByte    = "byte"
+	Conn        = "conn"
+	ReqPerSecd  = "req/s"
 )
 
 type MetricSample struct {
