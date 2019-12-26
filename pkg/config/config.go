@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const defaultWsSite = "ws://localhost:8100/ws"
+const defaultSite = "localhost"
 
 var overrideVars = map[string]interface{}{}
 
@@ -24,7 +24,7 @@ func init() {
 // initConfig initializes the config defaults on a config
 func initConfig(config Config) {
 	// Agent
-	config.SetDefault("ws_url", defaultWsSite)
+	config.SetDefault("site", defaultSite)
 	config.BindEnvAndSetDefault("endpoint", nil)
 	config.BindEnvAndSetDefault("api_key", nil)
 

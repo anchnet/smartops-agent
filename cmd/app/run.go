@@ -6,6 +6,7 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/collector"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
+	"github.com/anchnet/smartops-agent/pkg/http"
 	"github.com/anchnet/smartops-agent/pkg/pidfile"
 	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
@@ -96,6 +97,15 @@ func startAgent() error {
 		}
 	}
 
+	// validate api_key
+	err = http.ValidateAPIKey()
+	if err != nil {
+		return log.Errorf("validate api_key error, %v", err)
+	}
+	log.Infof("API key validate success.")
+
+	// check plugins
+
 	// setup the forwarder
 	if err := forwarder.GetDefaultForwarder().Start(); err != nil {
 		return log.Errorf("error start forwarder: %v", err)
@@ -115,3 +125,24 @@ func stopAgent() {
 		_ = log.Errorf("error while closing connection, %v", err)
 	}
 }
+
+/*
+func heartbeat() {
+	url := fmt.Sprintf("%s%s?endpoint=%s", fh.domain, agentHealthCheckEndpoint, config.SmartOps.GetString("endpoint"))
+	transport := util.CreateHttpTransport()
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   10 * time.Second,
+	}
+
+	resp, err := client.Get(url)
+	if err != nil {
+		_ = log.Errorf("heartbeat network error: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		bytes, _ := ioutil.ReadAll(resp.Body)
+		_ = log.Errorf("heartbeat error: %v", string(bytes))
+	}
+}
+*/
