@@ -1,2 +1,3 @@
 instances:
-  - nginx_status_url: http://localhost:81/nginx_status
+   nginx_status_url:
+      - http://localhost:8888/nginx_status

@@ -105,7 +105,11 @@ func startAgent() error {
 	log.Infof("API key validate success.")
 
 	// check plugins
-
+	// init nginx configs
+	if err := common.SetupNgxConfig(common.DefaultNgxConfPath); err != nil {
+		_ = log.Errorf("Failed to setup config %v", err)
+		return fmt.Errorf("ubable to set nginx configuration: %v", err)
+	}
 	// setup the forwarder
 	if err := forwarder.GetDefaultForwarder().Start(); err != nil {
 		return log.Errorf("error start forwarder: %v", err)

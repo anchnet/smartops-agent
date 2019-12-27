@@ -12,6 +12,11 @@ var (
 )
 
 const (
+
+	// DefaultNgxConfPath points to the folder containing nginx.yaml
+	DefaultNgxConfPath = "conf/plugins.d/nginx.d/"
+	// DefaultMysqlConfPath points to the folder containing mysql.yaml
+	DefaultMysqlConfPath = "conf/plugins/mysql.d/"
 	// DefaultConfPath points to the folder containing smartops.yaml
 	DefaultConfPath = "conf"
 	// DefaultLogFile points to the log file that will be used if not configured

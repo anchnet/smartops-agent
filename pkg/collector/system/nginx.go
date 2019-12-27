@@ -3,8 +3,10 @@ package system
 import (
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
+	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -27,35 +29,44 @@ type NgxData struct {
 	waiting     int
 }
 
-func (c NginxCheck) newNgx() *NginxCheck {
-	return &NginxCheck{
-		name: "",
-		//ngxPort:  config.SmartOps.GetString("nginx_port"),
-		//ngxRoute: config.SmartOps.GetString("nginx_route"),
-	}
-}
 func (c *NginxCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
-	var samples []metric.MetricSample
-	if c.ngxRoute == "" || c.ngxPort == "" {
+	ngxUrls := config.Nginx.GetStringSlice("instances.nginx_status_url")
+	if ngxUrls == nil {
 		return nil, nil
 	}
-	data, err := c.getNgxMonitorData()
-	if err != nil {
-		return nil, err
+	var samples []metric.MetricSample
+	for _, url := range ngxUrls {
+		tag := getTag(url)
+		data, err := c.getNgxMonitorData(url)
+		if err != nil {
+			return nil, err
+		}
+		samples = append(samples, c.collectNginxMetrics(data, t, tag)...)
 	}
-	samples = append(samples, c.collectNginxMetrics(data, t)...)
 	return samples, nil
 }
 
-func (c *NginxCheck) collectNginxMetrics(ngxData NgxData, time time.Time) []metric.MetricSample {
+func getTag(url string) string {
+	re := regexp.MustCompile(`//(.*?):`)
+	tag := re.FindAllStringSubmatch(url, -1)
+	tmpIp := tag[0][1]
+	realIp, err := net.LookupHost(tmpIp)
+	if err == nil {
+		return realIp[0]
+	}
+	return ""
+}
+func (c *NginxCheck) collectNginxMetrics(ngxData NgxData, time time.Time, tag string) []metric.MetricSample {
+	tagMap := make(map[string]string, 1)
+	tagMap["host"] = tag
 	var samples []metric.MetricSample
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections"), float64(ngxData.connections), metric.Conn, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("accepts"), float64(ngxData.accepts), metric.Conn, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("conn_dropped_per_s"), float64(ngxData.dropPerSecd), metric.ReqPerSecd, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("request_per_s"), float64(ngxData.request), metric.ReqPerSecd, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reading"), float64(ngxData.reading), metric.Conn, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writing"), float64(ngxData.writing), metric.Conn, time, nil))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting"), float64(ngxData.waiting), metric.Conn, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections"), float64(ngxData.connections), metric.Conn, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("accepts"), float64(ngxData.accepts), metric.Conn, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("conn_dropped_per_s"), float64(ngxData.dropPerSecd), metric.ReqPerSecd, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("request_per_s"), float64(ngxData.request), metric.ReqPerSecd, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reading"), float64(ngxData.reading), metric.Conn, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writing"), float64(ngxData.writing), metric.Conn, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting"), float64(ngxData.waiting), metric.Conn, time, tagMap))
 	return samples
 }
 
@@ -63,8 +74,7 @@ func (c *NginxCheck) Name() string {
 	return "nginx"
 }
 
-func (c *NginxCheck) getNgxMonitorData() (NgxData, error) {
-	url := formatUrl(c.ngxPort, c.ngxRoute)
+func (c *NginxCheck) getNgxMonitorData(url string) (NgxData, error) {
 	resp, err := http.Get(url)
 	var ngxData NgxData
 	if err != nil {
@@ -109,14 +119,9 @@ func (c *NginxCheck) formatResponse(statData string) (int, int, int, int, int, i
 	return connections, accepts, dropPerSecd, request, read, writing, waiting
 }
 
-func formatUrl(port string, route string) string {
-	format := "http://localhost:%s/%s"
-	return fmt.Sprint(format, port, route)
-}
-
 func (c *NginxCheck) formatMetric(metricName string) string {
 	format := "nginx.net.%s"
-	return fmt.Sprint(format, metricName)
+	return fmt.Sprintf(format, metricName)
 }
 
 func init() {
