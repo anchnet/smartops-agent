@@ -1,4 +1,4 @@
-package system
+package plugin
 
 import (
 	"fmt"
@@ -14,9 +14,7 @@ import (
 )
 
 type NginxCheck struct {
-	name     string
-	ngxPort  string
-	ngxRoute string
+	name string
 }
 
 type NgxData struct {
@@ -29,7 +27,7 @@ type NgxData struct {
 	waiting     int
 }
 
-func (c *NginxCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
+func (c *NginxCheck) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
 	ngxUrls := config.Nginx.GetStringSlice("instances.nginx_status_url")
 	if ngxUrls == nil {
 		return nil, nil
@@ -70,7 +68,7 @@ func (c *NginxCheck) collectNginxMetrics(ngxData NgxData, time time.Time, tag st
 	return samples
 }
 
-func (c *NginxCheck) Name() string {
+func (c *NginxCheck) PluginName() string {
 	return "nginx"
 }
 
@@ -126,7 +124,7 @@ func (c *NginxCheck) formatMetric(metricName string) string {
 
 func init() {
 	//config.SmartOps.GetString("nginx_port")
-	core.RegisterCheck(&NginxCheck{
+	core.RegisterPluginCheck(&NginxCheck{
 		name: "nginx",
 	})
 }
