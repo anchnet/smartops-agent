@@ -3,6 +3,7 @@ package forwarder
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/executor"
 	"github.com/anchnet/smartops-agent/pkg/packet"
@@ -24,11 +25,9 @@ const (
 	execJobRunScript   = "job_run_script"
 	execJobSchedule    = "job_schedule"
 	execAgentUninstall = "agent_uninstall"
-)
 
-const (
-	apiKeyValidateEndpoint   = "/agent/validate"
-	agentHealthCheckEndpoint = "/agent/health_check"
+	AuthType = "auth"
+	TaskType = "task"
 )
 
 var forwarderInstance *defaultForwarder
@@ -51,8 +50,9 @@ type defaultForwarder struct {
 }
 
 func newDefaultForwarder() *defaultForwarder {
+	wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
 	return &defaultForwarder{
-		wsAddr: config.SmartOps.GetString("ws_url"),
+		wsAddr: wsAddr,
 		apiKey: config.SmartOps.GetString("api_key"),
 
 		state: STOPPED,
@@ -80,14 +80,6 @@ func (f *defaultForwarder) Connected() bool {
 }
 
 func (f *defaultForwarder) connect() error {
-	//if f.wsConn != nil && f.state == STARTED {
-	//	err := f.wsConn.WriteMessage(websocket.TextMessage, []byte("ping"))
-	//	if err == nil {
-	//		f.connected = true
-	//		log.Info("Connection is ok.")
-	//		return nil
-	//	}
-	//}
 	log.Infof("Connecting to %v #%d", f.wsAddr, f.retryCount)
 	f.retryCount++
 	conn, _, err := websocket.DefaultDialer.Dial(f.wsAddr, nil)
@@ -99,11 +91,6 @@ func (f *defaultForwarder) connect() error {
 	conn.EnableWriteCompression(true)
 	f.wsConn = conn
 	f.connected = true
-	log.Info("Sending api key ...")
-	_ = f.sendMessage(packet.NewAPIKeyPacket())
-	//if err != nil {
-	//	f.authenticated <- false
-	//}
 	return nil
 }
 
@@ -131,7 +118,7 @@ func (f *defaultForwarder) Stop() error {
 	f.m.Lock()
 	defer f.m.Unlock()
 	if f.state == STOPPED {
-		return log.Errorf("the forwarder is already closed")
+		return nil
 	}
 	f.state = STOPPED
 	f.healthChecker.Stop()
@@ -210,11 +197,11 @@ func (f *defaultForwarder) receiveLoop() {
 
 		} else {
 			log.Debugf("Message received: %s", response.String())
-			if response.Type == "auth" {
+			if response.Type == AuthType {
 				if response.Code != RESPONSE_SUCCESS {
 					_ = log.Errorf("Agent authenticate error: %s", response.Body)
 				}
-			} else if response.Type == "task" {
+			} else if response.Type == TaskType {
 				body, _ := json.Marshal(response.Body)
 				var task packet.Task
 				err = json.Unmarshal(body, &task)

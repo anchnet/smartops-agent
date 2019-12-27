@@ -14,8 +14,9 @@ type Packet struct {
 	Time     time.Time   `json:"time"`
 }
 
-type AuthToken struct {
-	Token string `json:"token"`
+type APIKey struct {
+	Endpoint string `json:"endpoint"`
+	Token    string `json:"authToken"`
 }
 
 type HeartbeatPack struct {
@@ -30,13 +31,10 @@ type TaskResult struct {
 	Completed bool   `json:"completed"`
 }
 
-func NewAPIKeyPacket() Packet {
-	apiKey := config.SmartOps.GetString("api_key")
-	return Packet{
+func NewAPIKeyPacket() APIKey {
+	return APIKey{
 		Endpoint: config.SmartOps.GetString("endpoint"),
-		Type:     "auth",
-		Data:     &AuthToken{Token: apiKey},
-		Time:     time.Now(),
+		Token:    config.SmartOps.GetString("api_key"),
 	}
 }
 func NewHeartbeatPacket() Packet {
