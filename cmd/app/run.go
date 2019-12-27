@@ -32,20 +32,20 @@ func run(cmd *cobra.Command, args []string) error {
 	defer func() {
 		stopAgent()
 	}()
-	signalOS := make(chan os.Signal, 1)
-	signal.Notify(signalOS, os.Interrupt, syscall.SIGTERM)
-	signalStop := make(chan error)
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+	errorCh := make(chan error)
 	go func() {
-		sig := <-signalOS
+		sig := <-signalCh
 		log.Infof("Receive signal '%s', shutting down...", sig)
-		signalStop <- nil
+		errorCh <- nil
 	}()
 
 	if err := startAgent(); err != nil {
 		return err
 	}
 
-	err := <-signalStop
+	err := <-errorCh
 	return err
 }
 
