@@ -33,3 +33,11 @@ func SetupNgxConfig(confFilePath string) error {
 	}
 	return nil
 }
+
+func SetUpMysqlConfig(confFilePath string) error {
+	config.Mysql.AddConfigPath(confFilePath)
+	if err := config.Load(config.Mysql); err != nil {
+		return fmt.Errorf("unable to load Mysql config file %s:", err)
+	}
+	return nil
+}

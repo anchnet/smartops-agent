@@ -110,7 +110,10 @@ func startAgent() error {
 		_ = log.Errorf("Failed to setup config %v", err)
 		return fmt.Errorf("ubable to set nginx configuration: %v", err)
 	}
-	// setup the forwarder
+	if err := common.SetUpMysqlConfig(common.DefaultMysqlConfPath); err != nil {
+		_ = log.Errorf("Failed to setup config %v", err)
+		return fmt.Errorf("ubable to set mysql configuration: %v", err)
+	} // setup the forwarder
 	if err := forwarder.GetDefaultForwarder().Start(); err != nil {
 		return log.Errorf("error start forwarder: %v", err)
 	}
