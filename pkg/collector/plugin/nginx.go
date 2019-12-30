@@ -60,8 +60,8 @@ func (c *NginxCheck) collectNginxMetrics(ngxData NgxData, time time.Time, tag st
 	var samples []metric.MetricSample
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections"), float64(ngxData.connections), metric.Conn, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("accepts"), float64(ngxData.accepts), metric.Conn, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("conn_dropped_per_s"), float64(ngxData.dropPerSecd), metric.ReqPerSecd, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("request_per_s"), float64(ngxData.request), metric.ReqPerSecd, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("conn_dropped_per_s"), float64(ngxData.dropPerSecd), metric.ReqPerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("request_per_s"), float64(ngxData.request), metric.ReqPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reading"), float64(ngxData.reading), metric.Conn, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writing"), float64(ngxData.writing), metric.Conn, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting"), float64(ngxData.waiting), metric.Conn, time, tagMap))
