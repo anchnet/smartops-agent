@@ -25,3 +25,19 @@ func SetupConfig(confFilePath string) error {
 	}
 	return nil
 }
+
+func SetupNgxConfig(confFilePath string) error {
+	config.Nginx.AddConfigPath(confFilePath)
+	if err := config.Load(config.Nginx); err != nil {
+		return fmt.Errorf("unable to load Nginx config file %s:", err)
+	}
+	return nil
+}
+
+func SetUpMysqlConfig(confFilePath string) error {
+	config.Mysql.AddConfigPath(confFilePath)
+	if err := config.Load(config.Mysql); err != nil {
+		return fmt.Errorf("unable to load Mysql config file %s:", err)
+	}
+	return nil
+}

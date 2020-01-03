@@ -54,7 +54,8 @@ func newDefaultForwarder() *defaultForwarder {
 	return &defaultForwarder{
 		wsAddr: wsAddr,
 		apiKey: config.SmartOps.GetString("api_key"),
-		state:  STOPPED,
+
+		state: STOPPED,
 		healthChecker: &forwarderHealth{
 			stop:    make(chan bool, 1),
 			stopped: make(chan struct{}),

@@ -104,8 +104,29 @@ func startAgent() error {
 	}
 	log.Infof("API key validate success.")
 
-	// check plugins
+	// init nginx configs
+	if err := common.SetupNgxConfig(common.DefaultNgxConfPath); err != nil {
+		// update plugin
+		if err := http.UpsertPlugins("nginx", false); err != nil {
+			log.Infof("Update online monitor plugins failed!")
+		}
+		_ = log.Errorf("Failed to setup config %v", err)
+	} else {
+		if err := http.UpsertPlugins("nginx", true); err != nil {
+			log.Infof("Create nginx online  plugins failed!")
+		}
+	}
+	if err := common.SetUpMysqlConfig(common.DefaultMysqlConfPath); err != nil {
+		if err := http.UpsertPlugins("mysql", false); err != nil {
+			log.Infof("Update online mysql plugins failed !")
+		}
+		_ = log.Errorf("Failed to setup config %v", err)
 
+	} else {
+		if err := http.UpsertPlugins("mysql", true); err != nil {
+			log.Infof("Create online mysql plugin failed!")
+		}
+	}
 	// setup the forwarder
 	if err := forwarder.GetDefaultForwarder().Start(); err != nil {
 		return log.Errorf("error start forwarder: %v", err)

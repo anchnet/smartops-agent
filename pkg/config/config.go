@@ -12,6 +12,8 @@ var overrideVars = map[string]interface{}{}
 //SmartOps is the global configuration object
 var (
 	SmartOps Config
+	Nginx    Config
+	Mysql    Config
 )
 
 func init() {
@@ -19,6 +21,12 @@ func init() {
 	SmartOps = NewConfig("smartops", "SO", strings.NewReplacer(".", "_"))
 	// Configuration defaults
 	initConfig(SmartOps)
+	// Configure Nignx global configuration
+	Nginx = NewConfig("nginx", "SO", strings.NewReplacer(".", "_"))
+	initConfig(Nginx)
+	// Configure mysql global configuration
+	Mysql = NewConfig("mysql", "SO", strings.NewReplacer(".", "_"))
+	initConfig(Mysql)
 }
 
 // initConfig initializes the config defaults on a config
@@ -34,6 +42,10 @@ func initConfig(config Config) {
 	config.BindEnvAndSetDefault("log_level", "info")
 	config.BindEnvAndSetDefault("log_to_console", true)
 	config.BindEnvAndSetDefault("log_format_json", false)
+	// Nginx
+	config.BindEnvAndSetDefault("instances.nginx_status_url", nil)
+	// Mysql
+	config.BindEnvAndSetDefault("instances", nil)
 }
 
 func findUnknownKeys(config Config) []string {
