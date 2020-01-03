@@ -19,12 +19,6 @@ type APIKey struct {
 	Token    string `json:"authToken"`
 }
 
-type Plug struct {
-	ResourceId     string `json:"resourceId"`
-	PluginCategory string `json:"pluginCategory"`
-	IsPluginExist  bool   `json:"isPluginExist"`
-}
-
 type HeartbeatPack struct {
 	Message string   `json:"message"`
 	IPsv4   []string `json:"ipsv4"`
@@ -52,15 +46,6 @@ func NewHeartbeatPacket() Packet {
 		Time:     time.Now(),
 	}
 }
-
-func InitPluginPacket(plugCategory string, isExist bool) Plug {
-	return Plug{
-		ResourceId:     config.SmartOps.GetString("endpoint"),
-		PluginCategory: plugCategory,
-		IsPluginExist:  isExist,
-	}
-}
-
 func NewServerPacket(data []metric.MetricSample) Packet {
 	return Packet{
 		Endpoint: config.SmartOps.GetString("endpoint") + "_server",

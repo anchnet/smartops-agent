@@ -5,13 +5,8 @@ import (
 )
 
 const (
-	UnitPercent   = "%"
-	UnitByte      = "byte"
-	BytePerSecond = "byte/s"
-	Conn          = "conn"
-	ReqPerSecond  = "req/s"
-	ConnPerSecond = "conn/s"
-	Req           = "req"
+	UnitPercent = "%"
+	UnitByte    = "byte"
 )
 
 type MetricSample struct {
