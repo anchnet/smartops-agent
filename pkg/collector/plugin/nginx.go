@@ -2,9 +2,11 @@ package plugin
 
 import (
 	"fmt"
+	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/metric"
+	"github.com/anchnet/smartops-agent/pkg/util/file"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -28,6 +30,10 @@ type NgxData struct {
 }
 
 func (c *NginxCheck) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
+	// check nginx.yaml is exist
+	if !file.IsExist(fmt.Sprintf("%s/nginx.yaml", common.DefaultNgxConfPath)) {
+		return nil, nil
+	}
 	ngxUrls := config.Nginx.GetStringSlice("instances.nginx_status_url")
 	if ngxUrls == nil {
 		return nil, nil

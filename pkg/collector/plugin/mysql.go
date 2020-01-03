@@ -3,12 +3,14 @@ package plugin
 import (
 	"database/sql"
 	"fmt"
+	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/metric"
+	"github.com/anchnet/smartops-agent/pkg/util/file"
+	log "github.com/cihub/seelog"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/json-iterator/go"
-	"log"
 	"strconv"
 	"time"
 )
@@ -34,12 +36,12 @@ type DatabaseMetadata struct {
 }
 
 type DatabaseMetrics struct {
-	CurrentConnections          int `json:"current_connections"`
-	ConnectionsPerSecond        int `json:"connections_per_second"`
-	AbortedConnectionsPerSecond int `json:"aborted_connections_per_second"`
-	QueriesPerSecond            int `json:"queries_per_second"`
-	ReadsPerSecond              int `json:"read_per_second"`
-	WritesPerSecond             int `json:"write_per_second"`
+	CurrentConnections          int     `json:"current_connections"`
+	ConnectionsPerSecond        float64 `json:"connections_per_second"`
+	AbortedConnectionsPerSecond float64 `json:"aborted_connections_per_second"`
+	QueriesPerSecond            float64 `json:"queries_per_second"`
+	ReadsPerSecond              float64 `json:"read_per_second"`
+	WritesPerSecond             float64 `json:"write_per_second"`
 	Uptime                      int
 	connections                 int
 	abortedConnections          int
@@ -56,8 +58,17 @@ func (c *MysqlCheck) formatMysqlUrl() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/information_schema", c.UserName, c.Password, c.Host, c.Port)
 }
 
+var previousStatus *DatabaseStatus
+
 func (c *MysqlCheck) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
+	// check mysql.yaml is exist
+	if !file.IsExist(fmt.Sprintf("%s/mysql.yaml", common.DefaultMysqlConfPath)) {
+		return nil, nil
+	}
 	connParams := config.Mysql.Get("instances")
+	if connParams == nil {
+		log.Debug("Find no mysql configs!")
+	}
 	connBytes, err := jsoniter.Marshal(connParams)
 	var samples []metric.MetricSample
 	var params []map[string]map[string]interface{}
@@ -85,11 +96,17 @@ func (c *MysqlCheck) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
 			Host:     host,
 		}
 		// collect mysql monitor data
-		databaseStatus, err := Status(*msqCheck, new(DatabaseStatus))
+		databaseStatus, err := Status(*msqCheck, previousStatus)
 		if err != nil {
 			fmt.Println(err)
 		}
+		if previousStatus == nil {
+			previousStatus = databaseStatus
+			return nil, nil
+		}
 		samples = append(samples, c.collectNginxMetrics(*databaseStatus, t, c.Host)...)
+		previousStatus = databaseStatus
+
 		return samples, nil
 	}
 
@@ -102,16 +119,16 @@ func (c *MysqlCheck) collectNginxMetrics(databaseStatus DatabaseStatus, time tim
 	tagMap := make(map[string]string)
 	tagMap["host"] = tag
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections"), float64(data.connections), metric.Conn, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections_per_second"), float64(data.ConnectionsPerSecond), metric.ConnPerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections_per_second"), data.ConnectionsPerSecond, metric.ConnPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("queries"), float64(data.queries), metric.Req, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("queries_per_second"), float64(data.QueriesPerSecond), metric.ReqPerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("queries_per_second"), data.QueriesPerSecond, metric.ReqPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("aborted_connections"), float64(data.abortedConnections), metric.Conn, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("aborted_connections_per_second"), float64(data.AbortedConnectionsPerSecond), metric.ConnPerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("aborted_connections_per_second"), data.AbortedConnectionsPerSecond, metric.ConnPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reads"), float64(data.reads), metric.UnitByte, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reads_per_second"), float64(data.ReadsPerSecond), metric.BytePerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reads_per_second"), data.ReadsPerSecond, metric.BytePerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writes"), float64(data.writes), metric.UnitByte, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writes_per_second"), float64(data.WritesPerSecond), metric.BytePerSecond, time, tagMap))
-	//samples = append(samples, metric.NewServerMetricSample(c.formatMetric("uptime"), float64(data.Uptime), metric., time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writes_per_second"), data.WritesPerSecond, metric.BytePerSecond, time, tagMap))
+	//samples = append(samples, metric.NewServerMetricSample(c.formatMetric("uptime"), float32(data.Uptime), metric., time, tagMap))
 	return samples
 }
 
@@ -155,7 +172,7 @@ func execQuery(c MysqlCheck, queryType string, previous *DatabaseStatus, status 
 	} else if queryType == "variables" {
 		table = "GLOBAL_VARIABLES"
 	} else {
-		log.Fatal("Unknown queryType")
+		log.Infof("Unknown queryType")
 	}
 
 	// Connect to the database
@@ -201,7 +218,7 @@ func processMetric(previous *DatabaseStatus, status *DatabaseStatus, key string,
 		err                error
 		currentConnections int
 		connections        int
-		diff               int
+		diff               float64
 		abortedConnections int
 		queries            int
 		uptime             int
@@ -220,7 +237,7 @@ func processMetric(previous *DatabaseStatus, status *DatabaseStatus, key string,
 			status.Metrics.ConnectionsPerSecond = 0
 			status.Metrics.connections = connections
 		} else {
-			diff = connections - previous.Metrics.connections
+			diff = float64(connections-previous.Metrics.connections) / float64(10)
 			if diff > 0 {
 				status.Metrics.ConnectionsPerSecond = diff
 			} else {
@@ -235,7 +252,7 @@ func processMetric(previous *DatabaseStatus, status *DatabaseStatus, key string,
 			status.Metrics.AbortedConnectionsPerSecond = 0
 			status.Metrics.abortedConnections = abortedConnections
 		} else {
-			diff = abortedConnections - previous.Metrics.abortedConnections
+			diff = float64(abortedConnections-previous.Metrics.abortedConnections) / float64(10)
 			if diff > 0 {
 				status.Metrics.AbortedConnectionsPerSecond = diff
 			} else {
@@ -251,7 +268,7 @@ func processMetric(previous *DatabaseStatus, status *DatabaseStatus, key string,
 			status.Metrics.QueriesPerSecond = 0
 			status.Metrics.queries = queries
 		} else {
-			diff = queries - previous.Metrics.queries
+			diff = float64(queries-previous.Metrics.queries) / float64(10)
 			if diff > 0 {
 				status.Metrics.QueriesPerSecond = diff
 			} else {
@@ -301,17 +318,17 @@ func processVariable(status *DatabaseStatus, key string, value string) error {
 }
 
 func postProcessMetrics(previous *DatabaseStatus, status *DatabaseStatus) error {
-	var diff int
+	var diff float64
 
 	// If we don't have a previous value for the total reads
 	if previous != nil {
-		diff = status.Metrics.reads - previous.Metrics.reads
+		diff = float64(status.Metrics.reads-previous.Metrics.reads) / float64(10)
 		if diff > 0 {
 			status.Metrics.ReadsPerSecond = diff
 		} else {
 			status.Metrics.ReadsPerSecond = 0
 		}
-		diff = status.Metrics.writes - previous.Metrics.writes
+		diff = float64(status.Metrics.writes-previous.Metrics.writes) / float64(10)
 		if diff > 0 {
 			status.Metrics.WritesPerSecond = diff
 		} else {
