@@ -36,18 +36,20 @@ type DatabaseMetadata struct {
 }
 
 type DatabaseMetrics struct {
-	CurrentConnections          int     `json:"current_connections"`
-	ConnectionsPerSecond        float64 `json:"connections_per_second"`
-	AbortedConnectionsPerSecond float64 `json:"aborted_connections_per_second"`
-	QueriesPerSecond            float64 `json:"queries_per_second"`
-	ReadsPerSecond              float64 `json:"read_per_second"`
-	WritesPerSecond             float64 `json:"write_per_second"`
-	Uptime                      int
-	connections                 int
-	abortedConnections          int
-	queries                     int
-	reads                       int
-	writes                      int
+	CurrentConnections             int     `json:"current_connections"`
+	ConnectionsPerSecond           float64 `json:"connections_per_second"`
+	AbortedConnectionsPerSecond    float64 `json:"aborted_connections_per_second"`
+	QueriesPerSecond               float64 `json:"queries_per_second"`
+	ReadsPerSecond                 float64 `json:"read_per_second"`
+	WritesPerSecond                float64 `json:"write_per_second"`
+	InnodbBufferPoolReadsPerSecond float64 `json:"innodb_buffer_pool_reads_per_second"`
+	InnodbBufferPoolReads          int
+	Uptime                         int
+	connections                    int
+	abortedConnections             int
+	queries                        int
+	reads                          int
+	writes                         int
 }
 type DatabaseVariables struct {
 	MaxConnections int `json:"max_connections"`
@@ -128,6 +130,7 @@ func (c *MysqlCheck) collectNginxMetrics(databaseStatus DatabaseStatus, time tim
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reads_per_second"), data.ReadsPerSecond, metric.BytePerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writes"), float64(data.writes), metric.UnitByte, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writes_per_second"), data.WritesPerSecond, metric.BytePerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("innodb_buffer_pool_reads_per_second"), data.InnodbBufferPoolReadsPerSecond, metric.BytePerSecond, time, tagMap))
 	//samples = append(samples, metric.NewServerMetricSample(c.formatMetric("uptime"), float32(data.Uptime), metric., time, tagMap))
 	return samples
 }
@@ -215,14 +218,15 @@ func execQuery(c MysqlCheck, queryType string, previous *DatabaseStatus, status 
 
 func processMetric(previous *DatabaseStatus, status *DatabaseStatus, key string, value string) error {
 	var (
-		err                error
-		currentConnections int
-		connections        int
-		diff               float64
-		abortedConnections int
-		queries            int
-		uptime             int
-		readWriteValue     int
+		err                   error
+		currentConnections    int
+		innodbBufferPoolReads int
+		connections           int
+		diff                  float64
+		abortedConnections    int
+		queries               int
+		uptime                int
+		readWriteValue        int
 	)
 
 	switch key {
@@ -244,6 +248,20 @@ func processMetric(previous *DatabaseStatus, status *DatabaseStatus, key string,
 				status.Metrics.ConnectionsPerSecond = 0
 			}
 			status.Metrics.connections = connections
+		}
+	case "INNODB_BUFFER_POOL_READS":
+		innodbBufferPoolReads, err = strconv.Atoi(value)
+		if previous == nil || previous.Metrics.InnodbBufferPoolReads == 0 {
+			status.Metrics.InnodbBufferPoolReadsPerSecond = 0
+			status.Metrics.InnodbBufferPoolReads = innodbBufferPoolReads
+		} else {
+			diff = float64(innodbBufferPoolReads-previous.Metrics.InnodbBufferPoolReads) / float64(10)
+			if diff > 0 {
+				status.Metrics.InnodbBufferPoolReadsPerSecond = diff
+			} else {
+				status.Metrics.ConnectionsPerSecond = 0
+			}
+			status.Metrics.InnodbBufferPoolReads = innodbBufferPoolReads
 		}
 	case "ABORTED_CONNECTS":
 		abortedConnections, err = strconv.Atoi(value)
@@ -346,6 +364,6 @@ func (c *MysqlCheck) formatMetric(metricName string) string {
 
 func init() {
 	core.RegisterPluginCheck(&MysqlCheck{
-		name: "nginx",
+		name: "mysql",
 	})
 }
