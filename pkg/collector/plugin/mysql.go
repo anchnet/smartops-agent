@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-type MysqlCheck struct {
+type MysqlParams struct {
 	name     string
 	UserName string
 	Password string
@@ -24,15 +24,8 @@ type MysqlCheck struct {
 }
 
 type DatabaseStatus struct {
-	Metadata  DatabaseMetadata
 	Metrics   DatabaseMetrics
 	Variables DatabaseVariables
-}
-
-type DatabaseMetadata struct {
-	Name string `json:"name"`
-	Host string `json:"host"`
-	Port int    `json:"port"`
 }
 
 type DatabaseMetrics struct {
@@ -56,23 +49,29 @@ type DatabaseVariables struct {
 }
 
 // format connect mysql url
-func (c *MysqlCheck) formatMysqlUrl() string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/information_schema", c.UserName, c.Password, c.Host, c.Port)
+func (c *MysqlParams) formatMysqlUrl() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/information_schema", mysqlParams.UserName, mysqlParams.Password, mysqlParams.Host, mysqlParams.Port)
 }
 
 var previousStatus *DatabaseStatus
 
-func (c *MysqlCheck) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
-	// check mysql.yaml is exist
+var localConnPool *sql.DB
+
+var mysqlParams *MysqlParams
+
+func (c *MysqlParams) initMysqlParams() {
+	if mysqlParams != nil {
+		return
+	}
 	if !file.IsExist(fmt.Sprintf("%s/mysql.yaml", common.DefaultMysqlConfPath)) {
-		return nil, nil
+		return
 	}
 	connParams := config.Mysql.Get("instances")
 	if connParams == nil {
 		log.Debug("Find no mysql configs!")
 	}
 	connBytes, err := jsoniter.Marshal(connParams)
-	var samples []metric.MetricSample
+
 	var params []map[string]map[string]interface{}
 	if err != nil {
 		fmt.Println(err)
@@ -90,32 +89,54 @@ func (c *MysqlCheck) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
 			fmt.Println("convert origin port interface{} to float64 failed")
 		}
 		port := int(tempPort)
-		msqCheck := &MysqlCheck{
+		mysqlParams = &MysqlParams{
 			name:     "",
 			UserName: username,
 			Password: password,
 			Port:     port,
 			Host:     host,
 		}
-		// collect mysql monitor data
-		databaseStatus, err := Status(*msqCheck, previousStatus)
-		if err != nil {
-			fmt.Println(err)
-		}
-		if previousStatus == nil {
-			previousStatus = databaseStatus
-			return nil, nil
-		}
-		samples = append(samples, c.collectNginxMetrics(*databaseStatus, t, c.Host)...)
-		previousStatus = databaseStatus
-
-		return samples, nil
 	}
-
-	return nil, nil
+}
+func (c *MysqlParams) initConn() {
+	if localConnPool != nil {
+		return
+	}
+	db, err := sql.Open("mysql", c.formatMysqlUrl())
+	if err != nil {
+		log.Errorf("Connect to mysql server failed ! Message: ", err)
+	}
+	localConnPool = db
+	localConnPool.SetMaxOpenConns(2)
+	_, err = localConnPool.Exec("SET GLOBAL show_compatibility_56 = ON")
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
-func (c *MysqlCheck) collectNginxMetrics(databaseStatus DatabaseStatus, time time.Time, tag string) []metric.MetricSample {
+func (c *MysqlParams) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
+	// check mysql.yaml is exist
+	c.initMysqlParams()
+	// init mysql connection pools
+	c.initConn()
+	// collect mysql monitor data
+	var samples []metric.MetricSample
+
+	databaseStatus, err := Status(previousStatus)
+	if err != nil {
+		return nil, nil
+	}
+	if previousStatus == nil {
+		previousStatus = databaseStatus
+		return nil, nil
+	}
+	samples = append(samples, c.collectMysqlMetrics(*databaseStatus, t, c.Host)...)
+	previousStatus = databaseStatus
+
+	return samples, nil
+}
+
+func (c *MysqlParams) collectMysqlMetrics(databaseStatus DatabaseStatus, time time.Time, tag string) []metric.MetricSample {
 	var samples []metric.MetricSample
 	data := databaseStatus.Metrics
 	tagMap := make(map[string]string)
@@ -135,35 +156,30 @@ func (c *MysqlCheck) collectNginxMetrics(databaseStatus DatabaseStatus, time tim
 	return samples
 }
 
-func Status(c MysqlCheck, previous *DatabaseStatus) (*DatabaseStatus, error) {
+func Status(previous *DatabaseStatus) (*DatabaseStatus, error) {
 	status := &DatabaseStatus{
-		Metadata: DatabaseMetadata{
-			Name: c.UserName,
-			Host: c.Host,
-			Port: c.Port,
-		},
 		Metrics:   DatabaseMetrics{},
 		Variables: DatabaseVariables{},
 	}
 	// Fetch the metrics
-	err := execQuery(c, "metrics", previous, status)
+	err := execQuery("metrics", previous, status)
 	if err != nil {
 		return nil, err
 	}
 	// Fetch the variables
-	err = execQuery(c, "variables", previous, status)
+	err = execQuery("variables", previous, status)
 	if err != nil {
 		return nil, err
 	}
 	return status, nil
 }
 
-func (c *MysqlCheck) PluginName() string {
+func (c *MysqlParams) PluginName() string {
 	return "mysql"
 }
 
 // Execute a query on the given database for looking up metrics/variables
-func execQuery(c MysqlCheck, queryType string, previous *DatabaseStatus, status *DatabaseStatus) error {
+func execQuery(queryType string, previous *DatabaseStatus, status *DatabaseStatus) error {
 	var (
 		key   string
 		value string
@@ -177,19 +193,7 @@ func execQuery(c MysqlCheck, queryType string, previous *DatabaseStatus, status 
 	} else {
 		log.Infof("Unknown queryType")
 	}
-
-	// Connect to the database
-	conn, err := sql.Open("mysql", c.formatMysqlUrl())
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-	_, err = conn.Query("SET GLOBAL show_compatibility_56 = ON")
-
-	if err != nil {
-		return err
-	}
-	rows, err := conn.Query(fmt.Sprintf("SELECT VARIABLE_NAME AS 'key', VARIABLE_VALUE AS 'value' FROM %s", table))
+	rows, err := localConnPool.Query(fmt.Sprintf("SELECT VARIABLE_NAME AS 'key', VARIABLE_VALUE AS 'value' FROM %s", table))
 	if err != nil {
 		return err
 	}
@@ -357,13 +361,13 @@ func postProcessMetrics(previous *DatabaseStatus, status *DatabaseStatus) error 
 	return nil
 }
 
-func (c *MysqlCheck) formatMetric(metricName string) string {
+func (c *MysqlParams) formatMetric(metricName string) string {
 	format := "mysql.%s"
 	return fmt.Sprintf(format, metricName)
 }
 
 func init() {
-	core.RegisterPluginCheck(&MysqlCheck{
+	core.RegisterPluginCheck(&MysqlParams{
 		name: "mysql",
 	})
 }
