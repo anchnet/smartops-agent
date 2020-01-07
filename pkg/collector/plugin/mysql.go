@@ -108,6 +108,7 @@ func (c *MysqlParams) initConn() {
 	}
 	localConnPool = db
 	localConnPool.SetMaxOpenConns(2)
+	localConnPool.SetConnMaxLifetime(100 * time.Second)
 	_, err = localConnPool.Exec("SET GLOBAL show_compatibility_56 = ON")
 	if err != nil {
 		fmt.Println(err)
