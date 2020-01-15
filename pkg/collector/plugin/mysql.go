@@ -116,6 +116,9 @@ func (c *MysqlParams) initConn() {
 }
 
 func (c *MysqlParams) PluginCollect(t time.Time) ([]metric.MetricSample, error) {
+	if !file.IsExist(fmt.Sprintf("%s/mysql.yaml", common.DefaultMysqlConfPath)) {
+		return nil, nil
+	}
 	// check mysql.yaml is exist
 	c.initMysqlParams()
 	// init mysql connection pools
