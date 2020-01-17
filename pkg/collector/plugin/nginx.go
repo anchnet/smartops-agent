@@ -147,18 +147,18 @@ func (c *NginxCheck) collectNginxMetrics(ngxData NgxData, time time.Time, tag st
 	var samples []metric.MetricSample
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections"), float64(ngxData.connections), metric.Conn, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("accepts"), float64(ngxData.accepts), metric.Conn, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("drops"), float64(ngxData.drops), metric.ReqPerSecond, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("requests"), float64(ngxData.request), metric.ReqPerSecond, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reading"), float64(ngxData.reading), metric.Conn, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writing"), float64(ngxData.writing), metric.Conn, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting"), float64(ngxData.waiting), metric.Conn, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("drops"), float64(ngxData.drops), metric.Req, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("requests"), float64(ngxData.request), metric.Req, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("reading"), float64(ngxData.reading), metric.UnitByte, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writing"), float64(ngxData.writing), metric.UnitByte, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting"), float64(ngxData.waiting), metric.UnitByte, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections_per_second"), ngxData.connectionsPerSecond, metric.ConnPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("request_per_second"), ngxData.requestPerSecond, metric.ReqPerSecond, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("accept_per_second"), ngxData.acceptsPerSecond, metric.ReqPerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("accept_per_second"), ngxData.acceptsPerSecond, metric.ConnPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting_per_second"), ngxData.waitingPerSecond, metric.ReqPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("read_per_second"), ngxData.readingPerSecond, metric.BytePerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writing_per_second"), ngxData.writingPerSecond, metric.BytePerSecond, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("drops_per_second"), ngxData.dropsPerSecond, metric.ConnPerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("drops_per_second"), ngxData.dropsPerSecond, metric.ReqPerSecond, time, tagMap))
 
 	return samples
 }
