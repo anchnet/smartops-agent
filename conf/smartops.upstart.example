@@ -11,7 +11,7 @@ console output
 
 script
 cd /opt/smartops-agent
-exec SO_LOG_TO_CONSOLE=false  /opt/smartops-agent/agent run
+exec /opt/smartops-agent/agent run
 end script
 
 pre-start script
