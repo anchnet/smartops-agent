@@ -155,7 +155,7 @@ func (c *NginxCheck) collectNginxMetrics(ngxData NgxData, time time.Time, tag st
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connections_per_second"), ngxData.connectionsPerSecond, metric.ConnPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("request_per_second"), ngxData.requestPerSecond, metric.ReqPerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("accept_per_second"), ngxData.acceptsPerSecond, metric.ConnPerSecond, time, tagMap))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting_per_second"), ngxData.waitingPerSecond, metric.ReqPerSecond, time, tagMap))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("waiting_per_second"), ngxData.waitingPerSecond, metric.BytePerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("read_per_second"), ngxData.readingPerSecond, metric.BytePerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("writing_per_second"), ngxData.writingPerSecond, metric.BytePerSecond, time, tagMap))
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("drops_per_second"), ngxData.dropsPerSecond, metric.ReqPerSecond, time, tagMap))
