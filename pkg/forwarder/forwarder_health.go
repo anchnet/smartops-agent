@@ -2,6 +2,7 @@ package forwarder
 
 import (
 	"github.com/anchnet/smartops-agent/pkg/packet"
+	"github.com/anchnet/smartops-agent/pkg/util"
 	log "github.com/cihub/seelog"
 	"time"
 )
@@ -37,8 +38,13 @@ func (fh *forwarderHealth) healthCheckLoop() {
 			return
 		case <-healthCheckTicker.C:
 			if fh.f.connected {
-				//log.Info("Sending heart beat...")
-				GetDefaultForwarder().SendMessage(packet.NewHeartbeatPacket())
+				// check local ip
+				ipsv4, err := util.LocalIPv4()
+				if err != nil {
+					_ = log.Errorf("get local ipv4 error, %v", err)
+					ipsv4 = nil
+				}
+				GetDefaultForwarder().SendMessage(packet.NewHeartbeatPacket(ipsv4))
 			}
 		}
 	}

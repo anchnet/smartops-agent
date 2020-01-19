@@ -78,7 +78,7 @@ func startAgent() error {
 		config.SmartOps.GetBool("log_format_json"),
 	)
 	if err != nil {
-		return fmt.Errorf("Error while setting up logging, exiting: %v", err)
+		return fmt.Errorf("error while setting up logging, exiting: %v", err)
 	}
 
 	log.Info("Starting SmartOps Agent...")
@@ -104,8 +104,6 @@ func startAgent() error {
 	}
 	log.Infof("API key validate success.")
 
-	// check plugins
-
 	// setup the forwarder
 	if err := forwarder.GetDefaultForwarder().Start(); err != nil {
 		return log.Errorf("error start forwarder: %v", err)
@@ -113,6 +111,9 @@ func startAgent() error {
 
 	// setup the collector
 	go collector.Collect()
+
+	// setup plugins
+
 	log.Info("Start running...")
 	return nil
 }

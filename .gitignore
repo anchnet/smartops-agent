@@ -16,7 +16,9 @@
 # Dependency directories (remove the comment below to include it)
 vendor/
 .idea
-var
+var/cache
+var/log
+var/run
 /go.sum
 conf/smartops.yaml
 /cmd/cmd

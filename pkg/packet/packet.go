@@ -3,7 +3,6 @@ package packet
 import (
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/metric"
-	"github.com/anchnet/smartops-agent/pkg/util"
 	"time"
 )
 
@@ -37,8 +36,7 @@ func NewAPIKeyPacket() APIKey {
 		Token:    config.SmartOps.GetString("api_key"),
 	}
 }
-func NewHeartbeatPacket() Packet {
-	ipsv4, _ := util.LocalIPv4()
+func NewHeartbeatPacket(ipsv4 []string) Packet {
 	return Packet{
 		Endpoint: config.SmartOps.GetString("endpoint"),
 		Type:     "heartbeat",

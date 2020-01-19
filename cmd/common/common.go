@@ -24,4 +24,6 @@ const (
 	DefaultPidFile = "var/run/agent.pid"
 	// Cache dir
 	DefaultCacheDir = "var/cache/"
+	// Plugins dir
+	DefaultPluginConfDir = DefaultConfPath + "/plugin.d/"
 )
