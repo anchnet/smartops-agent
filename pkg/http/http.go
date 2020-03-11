@@ -14,7 +14,7 @@ import (
 const (
 	apiKeyValidateEndpoint   = "/rundeck/run/agent/api/validate"
 	agentHealthCheckEndpoint = "/agent/health_check"
-	pluginsUpdate            = "/rundeck/agent/api/create"
+	pluginsUpdate            = "/rundeck/run/agent/api/create"
 )
 
 func ValidateAPIKey() error {
