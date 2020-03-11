@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	apiKeyValidateEndpoint   = "/rundeck/agent/api/validate"
+	apiKeyValidateEndpoint   = "/rundeck/run/agent/api/validate"
 	agentHealthCheckEndpoint = "/agent/health_check"
 )
 
