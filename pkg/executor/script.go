@@ -19,7 +19,8 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		}))
 		return
 	}
-	file := fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
+	//file := fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
+	file := fmt.Sprintf("/Users/james/scripts/smartops-agent/var/cache/%s.sh", task.Id)
 	err := ioutil.WriteFile(file, []byte(task.Content.(string)), 0744)
 	if err != nil {
 		_ = seelog.Errorf("save script content to file %s error, %v", file, err)
@@ -45,7 +46,7 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		}))
 		return
 	}
-	out, err := exec.Command("/bin/bash", file).Output()
+	err = execCommand(file, task, "script", sendMessage)
 	if err != nil {
 		result := packet.TaskResult{
 			TaskId: task.Id,
@@ -65,13 +66,7 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		_ = seelog.Errorf("run cmd error,%v", err)
 		return
 	}
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			TaskId: task.Id,
-			Output: line,
-		}))
-	}
+
 	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 		TaskId:    task.Id,
 		Output:    "SUCCESS",
