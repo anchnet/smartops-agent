@@ -216,6 +216,8 @@ func (f *defaultForwarder) receiveLoop() {
 					go executor.RunScript(task, f.SendMessage)
 				case execJobRunScript:
 					go executor.RunScript(task, f.SendMessage)
+				case execJobSchedule:
+					go executor.RunScript(task, f.SendMessage)
 				}
 			}
 		}
