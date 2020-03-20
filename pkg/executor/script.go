@@ -19,8 +19,8 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		}))
 		return
 	}
-	file := fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
-	//file := fmt.Sprintf("/Users/james/scripts/smartops-agent/var/cache/%s.sh", task.Id)
+	//file := fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
+	file := fmt.Sprintf("/Users/james/scripts/smartops-agent/var/cache/%s.sh", task.Id)
 	err := ioutil.WriteFile(file, []byte(task.Content.(string)), 0744)
 	if err != nil {
 		_ = seelog.Errorf("save script content to file %s error, %v", file, err)

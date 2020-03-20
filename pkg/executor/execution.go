@@ -4,8 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/packet"
-	"io"
-	"os"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -18,29 +17,36 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	}
 	//显示运行的命令
 	fmt.Printf("执行命令: %s\n", strings.Join(cmd.Args[1:], " "))
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "error=>", err.Error())
+	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
+	if err := cmd.Start(); err != nil {
+		log.Println("exec the cmd failed")
 		return err
 	}
-	cmd.Start() // Start开始执行c包含的命令，但并不会等待该命令完成即返回。Wait方法会返回命令的返回状态码并在命令返回后释放相关的资源。
 
-	reader := bufio.NewReader(stdout)
-
-	//实时循环读取输出流中的一行内容
-	for {
-		line, err2 := reader.ReadString('\n')
-		if err2 != nil || io.EOF == err2 {
-			break
-		}
-		// send message
+	scan := bufio.NewScanner(stderr)
+	for scan.Scan() {
+		s := scan.Text()
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 			TaskId: task.Id,
-			Output: line,
+			Code:   unknownError,
+			Output: s,
 		}))
-		fmt.Println(line)
 	}
-
-	cmd.Wait()
-	return err
+	scanner := bufio.NewScanner(stdout)
+	go func() {
+		for scanner.Scan() {
+			// send message
+			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+				TaskId: task.Id,
+				Output: scanner.Text(),
+			}))
+			fmt.Println(scanner.Text())
+		}
+	}()
+	err := cmd.Wait()
+	if err != nil {
+		return err
+	}
+	return nil
 }
