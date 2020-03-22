@@ -44,9 +44,6 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 			fmt.Println(scanner.Text())
 		}
 	}()
-	err := cmd.Wait()
-	if err != nil {
-		return err
-	}
+	cmd.Wait()
 	return nil
 }
