@@ -2,12 +2,18 @@ package executor
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	"log"
 	"os/exec"
 	"strings"
+	"sync"
 )
+
+var ok = true
+var wg sync.WaitGroup
+var newErr error
 
 func execCommand(params string, task packet.Task, action string, sendMessage func(packet packet.Packet)) error {
 
@@ -15,6 +21,7 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	if action == "script" {
 		cmd = exec.Command(commandName, params)
 	}
+
 	//显示运行的命令
 	fmt.Printf("执行命令: %s\n", strings.Join(cmd.Args[1:], " "))
 	stderr, _ := cmd.StderrPipe()
@@ -25,25 +32,43 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	}
 
 	scan := bufio.NewScanner(stderr)
-	for scan.Scan() {
-		s := scan.Text()
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			TaskId: task.Id,
-			Code:   unknownError,
-			Output: s,
-		}))
-	}
+	go func() {
+		for scan.Scan() {
+			ok = false
+			s := scan.Text()
+			if !ok {
+				newErr = errors.New(s)
+			}
+			//sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+			//	TaskId: task.Id,
+			//	Code:   unknownError,
+			//	Output: s,
+			//}))
+		}
+	}()
+
 	scanner := bufio.NewScanner(stdout)
 	go func() {
 		for scanner.Scan() {
+			ok = true
 			// send message
+			s := scanner.Text()
+			fmt.Println("this is success: " + s)
 			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
 				TaskId: task.Id,
-				Output: scanner.Text(),
+				Output: s,
 			}))
-			fmt.Println(scanner.Text())
 		}
+		if ok {
+			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+				TaskId:    task.Id,
+				Output:    "SUCCESS",
+				Completed: true,
+			}))
+		}
+
 	}()
+
 	cmd.Wait()
-	return nil
+	return newErr
 }

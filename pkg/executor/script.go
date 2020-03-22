@@ -61,16 +61,13 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 			result.Output = e.Error()
 		case *os.PathError:
 			fmt.Println(e.Err)
+		default:
+			result.Code = unknownError
+			result.Output = e.Error()
 		}
 		sendMessage(packet.NewTaskResultPacket(result))
 		_ = seelog.Errorf("run cmd error,%v", err)
 		return
 	}
-
-	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-		TaskId:    task.Id,
-		Output:    "SUCCESS",
-		Completed: true,
-	}))
 	seelog.Infof("Task %s completed.", task.Id)
 }
