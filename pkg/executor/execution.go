@@ -51,6 +51,7 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	//go func() {
 	for scanner.Scan() {
 		ok = true
+		newErr = nil
 		// send message
 		s := scanner.Text()
 		fmt.Println("this is success: " + s)
