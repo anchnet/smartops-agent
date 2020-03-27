@@ -11,10 +11,13 @@ import (
 	"sync"
 )
 
-var ok = true
+var ok = false
 var wg sync.WaitGroup
 var newErr error
 
+func FormatOutput(resName, output string) string {
+	return fmt.Sprintf("%s: %s", resName, output)
+}
 func execCommand(params string, task packet.Task, action string, sendMessage func(packet packet.Packet)) error {
 
 	cmd := exec.Command(commandName, "-c", params)
@@ -32,43 +35,43 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	}
 
 	scan := bufio.NewScanner(stderr)
-	//go func() {
-	for scan.Scan() {
-		ok = false
-		s := scan.Text()
-		if !ok {
-			newErr = errors.New(s)
+	go func() {
+		for scan.Scan() {
+			ok = false
+			s := scan.Text()
+			if !ok {
+				newErr = errors.New(s)
+			}
+			//sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+			//	TaskId: task.Id,
+			//	Code:   unknownError,
+			//	Output: s,
+			//}))
 		}
-		//sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-		//	TaskId: task.Id,
-		//	Code:   unknownError,
-		//	Output: s,
-		//}))
-	}
-	//}()
+	}()
 
 	scanner := bufio.NewScanner(stdout)
-	//go func() {
-	for scanner.Scan() {
-		ok = true
-		newErr = nil
-		// send message
-		s := scanner.Text()
-		fmt.Println("this is success: " + s)
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			TaskId: task.Id,
-			Output: s,
-		}))
-	}
-	if ok {
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			TaskId:    task.Id,
-			Output:    "SUCCESS",
-			Completed: true,
-		}))
-	}
+	go func() {
+		for scanner.Scan() {
+			ok = true
+			newErr = nil
+			// send message
+			s := scanner.Text()
+			fmt.Println("this is success: " + s)
+			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+				TaskId: task.Id,
+				Output: FormatOutput(task.ResourceName, s),
+			}))
+		}
+		if ok {
+			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+				TaskId:    task.Id,
+				Output:    FormatOutput(task.ResourceName, "SUCCESS"),
+				Completed: true,
+			}))
+		}
 
-	//}()
+	}()
 
 	cmd.Wait()
 	return newErr

@@ -13,10 +13,11 @@ func (wr *WsResponse) String() string {
 }
 
 type Task struct {
-	Id      string      `json:"id"`
-	NodeId  string      `json:"nodeId"`
-	Type    string      `json:"type"`
-	Content interface{} `json:"content"`
+	Id           string      `json:"id"`
+	NodeId       string      `json:"nodeId"`
+	Type         string      `json:"type"`
+	Content      interface{} `json:"content"`
+	ResourceName string      `json:"resourceName"`
 }
 
 func (t *Task) String() string {
