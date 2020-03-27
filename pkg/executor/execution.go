@@ -63,13 +63,13 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 			Output: FormatOutput(task.ResourceName, s),
 		}))
 	}
-	//if ok {
-	//	sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-	//		TaskId:    task.Id,
-	//		Output:    FormatOutput(task.ResourceName, "SUCCESS"),
-	//		Completed: true,
-	//	}))
-	//}
+	if ok {
+		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+			TaskId:    task.Id,
+			Output:    FormatOutput(task.ResourceName, "SUCCESS"),
+			Completed: true,
+		}))
+	}
 
 	//}()
 
