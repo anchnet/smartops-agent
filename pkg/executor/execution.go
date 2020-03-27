@@ -35,43 +35,43 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	}
 
 	scan := bufio.NewScanner(stderr)
-	go func() {
-		for scan.Scan() {
-			ok = false
-			s := scan.Text()
-			if !ok {
-				newErr = errors.New(s)
-			}
-			//sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			//	TaskId: task.Id,
-			//	Code:   unknownError,
-			//	Output: s,
-			//}))
+	//go func() {
+	for scan.Scan() {
+		ok = false
+		s := scan.Text()
+		if !ok {
+			newErr = errors.New(s)
 		}
-	}()
+		//sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+		//	TaskId: task.Id,
+		//	Code:   unknownError,
+		//	Output: s,
+		//}))
+	}
+	//}()
 
 	scanner := bufio.NewScanner(stdout)
-	go func() {
-		for scanner.Scan() {
-			ok = true
-			newErr = nil
-			// send message
-			s := scanner.Text()
-			fmt.Println("this is success: " + s)
-			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-				TaskId: task.Id,
-				Output: FormatOutput(task.ResourceName, s),
-			}))
-		}
-		if ok {
-			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-				TaskId:    task.Id,
-				Output:    FormatOutput(task.ResourceName, "SUCCESS"),
-				Completed: true,
-			}))
-		}
+	//go func() {
+	for scanner.Scan() {
+		ok = true
+		newErr = nil
+		// send message
+		s := scanner.Text()
+		fmt.Println("this is success: " + s)
+		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+			TaskId: task.Id,
+			Output: FormatOutput(task.ResourceName, s),
+		}))
+	}
+	if ok {
+		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+			TaskId:    task.Id,
+			Output:    FormatOutput(task.ResourceName, "SUCCESS"),
+			Completed: true,
+		}))
+	}
 
-	}()
+	//}()
 
 	cmd.Wait()
 	return newErr
