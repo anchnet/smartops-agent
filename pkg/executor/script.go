@@ -44,15 +44,18 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		//	_ = seelog.Errorf("remove file %s error, %v", file.Name(), err)
 		//}
 	}()
-	err = exec.Command("chmod", "+x", file).Run()
-	if err != nil {
-		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
-			TaskId: task.Id,
-			Output: FormatOutput(task.ResourceName, "update file permission error"),
-			Code:   unknownError,
-		}))
-		return
+	if runtime.GOOS != "windows" {
+		err = exec.Command("chmod", "+x", file).Run()
+		if err != nil {
+			sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
+				TaskId: task.Id,
+				Output: FormatOutput(task.ResourceName, "update file permission error"),
+				Code:   unknownError,
+			}))
+			return
+		}
 	}
+
 	execCommand(file, task, "script", sendMessage)
 	//if err != nil {
 	//	result := packet.TaskResult{
