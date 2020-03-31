@@ -2,9 +2,13 @@ package executor
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/packet"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 	"io"
+	"io/ioutil"
 	"os/exec"
 	"runtime"
 )
@@ -67,6 +71,12 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 	for {
 		//n, err := reader.Read(buf[:])
 		buffers, _, err := buffer.ReadLine()
+		if runtime.GOOS == "windows" {
+			if string(buffers) == "" {
+				continue
+			}
+			buffers, _ = GbkToUtf8(buffers)
+		}
 		if err != nil {
 			// Read returns io.EOF at the end of file, which is not an error for us
 			if err == io.EOF {
@@ -85,6 +95,14 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 	}
 }
 
+func GbkToUtf8(s []byte) ([]byte, error) {
+	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
+	d, e := ioutil.ReadAll(reader)
+	if e != nil {
+		return nil, e
+	}
+	return d, nil
+}
 func sendCommandLineMessage(code int, task packet.Task, buffers []byte, sender func(packet packet.Packet)) {
 	switch code {
 	case STD_READ:
