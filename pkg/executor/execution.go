@@ -18,14 +18,22 @@ const (
 
 var commandName = "/bin/bash"
 var powershell = "powershell"
+var cmd *exec.Cmd
+
+const WINDOWS = "windows"
 
 func FormatOutput(resName, output string) string {
 	return fmt.Sprintf("%s: %s", resName, output)
 }
 func execCommand(params string, task packet.Task, action string, sendMessage func(packet packet.Packet)) {
-	cmd := exec.Command(commandName, "-c", params)
-	if action == "script" && runtime.GOOS != "windows" {
-		cmd = exec.Command(commandName, params)
+	if runtime.GOOS != WINDOWS {
+
+		if action == "cmd" {
+			cmd = exec.Command(commandName, "-c", params)
+		}
+		if action == "script" {
+			cmd = exec.Command(commandName, params)
+		}
 	} else {
 		cmd = exec.Command(powershell, params)
 	}
