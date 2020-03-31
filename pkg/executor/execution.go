@@ -6,6 +6,7 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	"io"
 	"os/exec"
+	"runtime"
 )
 
 const (
@@ -15,15 +16,20 @@ const (
 	//STD_FAIL    = 3
 )
 
+var commandName = "/bin/bash"
+var powershell = "powershell"
+
 func FormatOutput(resName, output string) string {
 	return fmt.Sprintf("%s: %s", resName, output)
 }
 func execCommand(params string, task packet.Task, action string, sendMessage func(packet packet.Packet)) {
-
 	cmd := exec.Command(commandName, "-c", params)
-	if action == "script" {
+	if action == "script" && runtime.GOOS != "windows" {
 		cmd = exec.Command(commandName, params)
+	} else {
+		cmd = exec.Command(powershell, params)
 	}
+
 	var errStdout, errStderr error
 	stdoutIn, _ := cmd.StdoutPipe()
 	stderrIn, _ := cmd.StderrPipe()

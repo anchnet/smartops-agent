@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-var commandName = "/bin/bash"
-
 func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 	if task.Content == nil || strings.Trim(task.Content.(string), " ") == "" {
 		sendMessage(packet.NewTaskResultPacket(packet.TaskResult{
@@ -19,6 +17,7 @@ func ExecCommand(task packet.Task, sendMessage func(packet packet.Packet)) {
 	}
 	cnt := task.Content.(string)
 	cmdLine := strings.Split(cnt, "\n")[0]
+
 	execCommand(cmdLine, task, "cmd", sendMessage)
 	//if err != nil {
 	//	result := packet.TaskResult{
