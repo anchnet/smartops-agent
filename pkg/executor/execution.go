@@ -35,7 +35,7 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 			cmd = exec.Command(commandName, params)
 		}
 	} else {
-		cmd = exec.Command(powershell, params)
+		cmd = exec.Command(powershell, params, "$OutputEncoding = [Console]::OutputEncoding; (Get-VMSwitch).Name")
 	}
 
 	var errStdout, errStderr error
