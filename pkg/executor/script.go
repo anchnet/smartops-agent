@@ -5,10 +5,12 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	"github.com/cihub/seelog"
 	"io/ioutil"
-	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
+
+var file string
 
 func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 	if task.Content == nil || strings.Trim(task.Content.(string), "") == "" {
@@ -19,7 +21,12 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		}))
 		return
 	}
-	file := fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
+	sysType := runtime.GOOS
+	if sysType == "windows" {
+		file = fmt.Sprintf("C://smartops-agent/var/cache/%s.bat", task.Id)
+	} else {
+		file = fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
+	}
 	//file := fmt.Sprintf("/Users/james/scripts/smartops-agent/var/cache/%s.sh", task.Id)
 	err := ioutil.WriteFile(file, []byte(task.Content.(string)), 0744)
 	if err != nil {
@@ -46,28 +53,28 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 		}))
 		return
 	}
-	err = execCommand(file, task, "script", sendMessage)
-	if err != nil {
-		result := packet.TaskResult{
-			TaskId: task.Id,
-		}
-		switch e := err.(type) {
-		case *exec.ExitError:
-			result.Code = e.ExitCode()
-			result.Output = FormatOutput(task.ResourceName, string(e.Stderr))
-			break
-		case *exec.Error:
-			result.Code = unknownError
-			result.Output = FormatOutput(task.ResourceName, e.Error())
-		case *os.PathError:
-			fmt.Println(e.Err)
-		default:
-			result.Code = unknownError
-			result.Output = FormatOutput(task.ResourceName, e.Error())
-		}
-		sendMessage(packet.NewTaskResultPacket(result))
-		_ = seelog.Errorf("run cmd error,%v", err)
-		return
-	}
+	execCommand(file, task, "script", sendMessage)
+	//if err != nil {
+	//	result := packet.TaskResult{
+	//		TaskId: task.Id,
+	//	}
+	//	switch e := err.(type) {
+	//	case *exec.ExitError:
+	//		result.Code = e.ExitCode()
+	//		result.Output = FormatOutput(task.ResourceName, string(e.Stderr))
+	//		break
+	//	case *exec.Error:
+	//		result.Code = unknownError
+	//		result.Output = FormatOutput(task.ResourceName, e.Error())
+	//	case *os.PathError:
+	//		fmt.Println(e.Err)
+	//	default:
+	//		result.Code = unknownError
+	//		result.Output = FormatOutput(task.ResourceName, e.Error())
+	//	}
+	//	sendMessage(packet.NewTaskResultPacket(result))
+	//	_ = seelog.Errorf("run cmd error,%v", err)
+	//	return
+	//}
 	seelog.Infof("Task %s completed.", task.Id)
 }
