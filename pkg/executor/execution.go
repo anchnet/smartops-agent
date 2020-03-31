@@ -72,9 +72,6 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 		//n, err := reader.Read(buf[:])
 		buffers, _, err := buffer.ReadLine()
 		if runtime.GOOS == "windows" {
-			if string(buffers) == "" {
-				continue
-			}
 			buffers, _ = GbkToUtf8(buffers)
 		}
 		if err != nil {
