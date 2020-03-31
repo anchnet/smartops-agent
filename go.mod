@@ -21,6 +21,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0
 	github.com/spf13/pflag v1.0.3
 	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb
+	golang.org/x/text v0.3.2
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )

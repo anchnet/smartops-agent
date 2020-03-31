@@ -71,6 +71,7 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 	for {
 		//n, err := reader.Read(buf[:])
 		buffers, _, err := buffer.ReadLine()
+
 		if runtime.GOOS == "windows" {
 			buffers, _ = GbkToUtf8(buffers)
 		}
@@ -85,6 +86,10 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 			return err
 		}
 		//fmt.Printf("this code is : %d and val : %s \n", code, string(buffers))
+		if string(buffers) == "" {
+			count++
+			continue
+		}
 		sendCommandLineMessage(code, task, buffers, sender)
 		if code == STD_READ && len(buffers) > 0 {
 			count++
