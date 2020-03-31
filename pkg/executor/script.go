@@ -23,7 +23,7 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 	}
 	sysType := runtime.GOOS
 	if sysType == "windows" {
-		file = fmt.Sprintf("C://smartops-agent/var/cache/%s.bat", task.Id)
+		file = fmt.Sprintf("C://smartops-agent/var/cache/%s.sh", task.Id)
 	} else {
 		file = fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
 	}
