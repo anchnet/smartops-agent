@@ -1,0 +1,11 @@
+endpoint: 5e1ea512d14f57d57c520a67
+api_key: 27939da3-03b4-48d6-9f9d-c71f94ced62d
+log_level: info
+site: devapi.smartops.anchnet.com
+
+
+##
+#endpoint: 5e44f96c576665c4e42222e2
+#api_key: de18b15d-86af-4184-97ba-815228dac360
+#log_level: info
+#site: testapi.smartops.anchnet.com

@@ -1,0 +1,15 @@
+[Unit]
+Description="CloudOps Agent"
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cloudops-agent
+PIDFile=/opt/cloudops-agent/var/run/agent.pid
+Restart=on-failure
+ExecStart=/opt/cloudops-agent/agent run
+StartLimitInterval=10
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

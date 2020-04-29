@@ -1,0 +1,33 @@
+#!/bin/bash
+WorkingDictionary=/opt/cloudops-agent
+start() {
+        cd $WorkingDictionary
+        nohup /opt/cloudops-agent/agent run > $WorkingDictionary/var/log/agent.log 2>&1 &
+        echo "start agent"
+}
+stop() {
+    echo "agent stop ..."
+        pid=`cat /opt/cloudops-agent/var/run/agent.pid`
+        kill -TERM $pid
+}
+status() {
+        echo "cloudops-agent status"
+}
+case "$1" in
+start)
+  start
+  ;;
+stop)
+  stop
+  ;;
+reload|restart)
+  stop
+  start
+  ;;
+status)
+  status $SNAME
+  ;;
+*)
+  echo $"Usage: $0 {start|stop|restart|status}"
+  exit 1
+esac
