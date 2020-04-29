@@ -18,7 +18,7 @@ var (
 
 func init() {
 	// Configure SmartOps global configuration
-	SmartOps = NewConfig("smartops", "SO", strings.NewReplacer(".", "_"))
+	SmartOps = NewConfig("cloudops", "SO", strings.NewReplacer(".", "_"))
 	// Configuration defaults
 	initConfig(SmartOps)
 	// Configure Nignx global configuration

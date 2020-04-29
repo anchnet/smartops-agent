@@ -9,8 +9,8 @@ import (
 
 var (
 	Command = &cobra.Command{
-		Use:   fmt.Sprint("/opt/smartops-agent/agent [command]", os.Args[0]),
-		Short: "SmartOps Agent at your service.",
+		Use:   fmt.Sprint("/opt/cloudops-agent/agent [command]", os.Args[0]),
+		Short: "CloudOps Agent at your service.",
 	}
 	confFilePath string
 )
@@ -18,5 +18,5 @@ var (
 const loggerName config.LoggerName = "CORE"
 
 func init() {
-	Command.PersistentFlags().StringVarP(&confFilePath, "cfgpath", "c", "", "path to directory containing smartops.yaml")
+	Command.PersistentFlags().StringVarP(&confFilePath, "cfgpath", "c", "", "path to directory containing cloudops.yaml")
 }

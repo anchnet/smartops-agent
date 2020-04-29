@@ -1,5 +1,5 @@
 @echo off
-@echo Smartops Agent Windows Build Package Script
+@echo CloudOps Agent Windows Build Package Script
 @echo =====================================================================
 @echo.
 
@@ -39,7 +39,7 @@ rd /S /Q "%BldDir%"
 md %BldDir%
 go build -o %BldDir%\agent.exe ..\..\..\cmd\main.go
 md %CnfDir%
-copy  "..\..\..\conf\smartops.yaml.example" "%CnfDir%\smartops.yaml"
+copy  "..\..\..\conf\cloudops.yaml.example" "%CnfDir%\cloudops.yaml"
 
 :: Find the NSIS Installer
 If Exist "C:\Program Files\NSIS\" (
@@ -112,4 +112,4 @@ makensis.exe /DVersion=%Version%  "%InsDir%\Setup.nsi"
 @echo %InsDir%
 
 :done
-if [%Version%] == [] pause
+if [%Version%] ==ls [] pause

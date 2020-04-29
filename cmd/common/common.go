@@ -17,14 +17,14 @@ const (
 	DefaultNgxConfPath = "conf/plugins.d/nginx.d/"
 	// DefaultMysqlConfPath points to the folder containing mysql.yaml
 	DefaultMysqlConfPath = "conf/plugins.d/mysql.d/"
-	// DefaultConfPath points to the folder containing smartops.yaml
+	// DefaultConfPath points to the folder containing cloudops.yaml
 	DefaultConfPath = "conf"
 	// DefaultLogFile points to the log file that will be used if not configured
 	DefaultLogFile = "var/log/agent.log"
 	// Default systemd
-	DefaultSystemdPath = "/lib/systemd/system/smartops-agent.service"
+	DefaultSystemdPath = "/lib/systemd/system/cloudops-agent.service"
 	// Default upstart
-	DefaultUpstartPath = "/etc/init/smartops-agent.conf"
+	DefaultUpstartPath = "/etc/init/cloudops-agent.conf"
 	// Default pid file
 	DefaultPidFile = "var/run/agent.pid"
 	// Cache dir

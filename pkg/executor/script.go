@@ -23,9 +23,9 @@ func RunScript(task packet.Task, sendMessage func(p packet.Packet)) {
 	}
 	sysType := runtime.GOOS
 	if sysType == "windows" {
-		file = fmt.Sprintf("C://smartops-agent/var/cache/%s.ps1", task.Id)
+		file = fmt.Sprintf("C://cloudops-agent/var/cache/%s.ps1", task.Id)
 	} else {
-		file = fmt.Sprintf("/opt/smartops-agent/var/cache/%s.sh", task.Id)
+		file = fmt.Sprintf("/opt/cloudops-agent/var/cache/%s.sh", task.Id)
 	}
 	//file := fmt.Sprintf("/Users/james/scripts/smartops-agent/var/cache/%s.sh", task.Id)
 	err := ioutil.WriteFile(file, []byte(task.Content.(string)), 0744)

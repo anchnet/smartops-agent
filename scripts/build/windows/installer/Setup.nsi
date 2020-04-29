@@ -1,12 +1,12 @@
-!define PRODUCT_NAME "Smartops Agent"
-!define PRODUCT_NAME_OTHER "Smartops"
-!define PRODUCT_PUBLISHER "Smartops"
-!define PRODUCT_WEB_SITE "https://smartops.anchnet.com"
+!define PRODUCT_NAME "CloudOps Agent"
+!define PRODUCT_NAME_OTHER "CloudOps"
+!define PRODUCT_PUBLISHER "CloudOps"
+!define PRODUCT_WEB_SITE "https://cloudops.thinkcloud.lenovo.com/"
 !define PRODUCT_BIN_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\agent.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_KEY_OTHER "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME_OTHER}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define OUTFILE "Smartops-Agent-${PRODUCT_VERSION}-${CPUARCH}-Setup.exe"
+!define OUTFILE "CloudOps-Agent-${CPUARCH}-Setup.exe"
 
 # Import Libraries
 !include "MUI2.nsh"
@@ -164,7 +164,7 @@ Function pageFinish_Show
     !define HWND_TOP 0x0000
 
     # Create Start Minion Checkbox
-    ${NSD_CreateCheckbox} 120u 90u 100% 12u "&Start smartops-agent"
+    ${NSD_CreateCheckbox} 120u 90u 100% 12u "&Start cloudops-agent"
     Pop $CheckBox_Minion_Start
     SetCtlColors $CheckBox_Minion_Start "" "ffffff"
     # This command required to bring the checkbox to the front
@@ -204,7 +204,7 @@ FunctionEnd
 ###############################################################################
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${OutFile}"
-InstallDir "c:\smartops-agent"
+InstallDir "c:\cloudops-agent"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
@@ -393,7 +393,7 @@ Section -Post
         "URLInfoAbout" "${PRODUCT_WEB_SITE}"
     WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" \
         "Publisher" "${PRODUCT_PUBLISHER}"
-    WriteRegStr HKLM "SYSTEM\CurrentControlSet\services\smartops-agent" \
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\services\cloudops-agent" \
         "DependOnService" "nsi"
 
     # Set the estimated size
@@ -406,17 +406,17 @@ Section -Post
     WriteRegStr HKLM "${PRODUCT_BIN_REGKEY}" "Path" "$INSTDIR\"
 
     # Register the Salt-Minion Service
-    nsExec::Exec "$INSTDIR\ssm.exe install smartops-agent $INSTDIR\agent.exe"
-    nsExec::Exec "$INSTDIR\ssm.exe set smartops-agent AppParameters run"
-    nsExec::Exec "$INSTDIR\ssm.exe set smartops-agent AppDirectory $INSTDIR"
-    nsExec::Exec "$INSTDIR\ssm.exe set smartops-agent Description Smartops Agent"
-    nsExec::Exec "$INSTDIR\ssm.exe set smartops-agent Start SERVICE_AUTO_START"
-    nsExec::Exec "$INSTDIR\ssm.exe set smartops-agent AppStopMethodConsole 24000"
-    nsExec::Exec "$INSTDIR\ssm.exe set smartops-agent AppStopMethodWindow 2000"
+    nsExec::Exec "$INSTDIR\ssm.exe install cloudops-agent $INSTDIR\agent.exe"
+    nsExec::Exec "$INSTDIR\ssm.exe set cloudops-agent AppParameters run"
+    nsExec::Exec "$INSTDIR\ssm.exe set cloudops-agent AppDirectory $INSTDIR"
+    nsExec::Exec "$INSTDIR\ssm.exe set cloudops-agent Description CloudOps Agent"
+    nsExec::Exec "$INSTDIR\ssm.exe set cloudops-agent Start SERVICE_AUTO_START"
+    nsExec::Exec "$INSTDIR\ssm.exe set cloudops-agent AppStopMethodConsole 24000"
+    nsExec::Exec "$INSTDIR\ssm.exe set cloudops-agent AppStopMethodWindow 2000"
 
     Call updateMinionConfig
 
-    Push "C:\smartops-agent"
+    Push "C:\cloudops-agent"
     Call AddToPath
 
 SectionEnd
@@ -426,12 +426,12 @@ Function .onInstSuccess
 
     # If StartMinionDelayed is 1, then set the service to start delayed
     ${If} $StartMinionDelayed == 1
-        nsExec::Exec "$INSTDIR\ssm.exe set smartops-agent Start SERVICE_DELAYED_AUTO_START"
+        nsExec::Exec "$INSTDIR\ssm.exe set cloudops-agent Start SERVICE_DELAYED_AUTO_START"
     ${EndIf}
 
     # If start-minion is 1, then start the service
     ${If} $StartMinion == 1
-        nsExec::Exec 'net start smartops-agent'
+        nsExec::Exec 'net start cloudops-agent'
     ${EndIf}
 
 FunctionEnd
@@ -461,8 +461,8 @@ Section Uninstall
 
     Call un.uninstallSalt
 
-    # Remove C:\smartops-agent from the Path
-    Push "C:\smartops-agent"
+    # Remove C:\cloudops-agent from the Path
+    Push "C:\cloudops-agent"
     Call un.RemoveFromPath
 
 SectionEnd
@@ -472,11 +472,11 @@ SectionEnd
 Function ${un}uninstallSalt
 
     # Make sure we're in the right directory
-    StrCpy $INSTDIR "C:\smartops-agent"
+    StrCpy $INSTDIR "C:\cloudops-agent"
 
-    # Stop and Remove smartops-qgent service
-    nsExec::Exec 'net stop smartops-agent'
-    nsExec::Exec 'sc delete smartops-agent'
+    # Stop and Remove cloudops-qgent service
+    nsExec::Exec 'net stop cloudops-agent'
+    nsExec::Exec 'sc delete cloudops-agent'
 
     # Remove files
     Delete "$INSTDIR\uninst.exe"
@@ -735,7 +735,7 @@ Function AddToPath
     IntCmp $4 234 0 +4 +4 # $4 == ERROR_MORE_DATA
         DetailPrint "AddToPath Failed: original length $2 > ${NSIS_MAX_STRLEN}"
         MessageBox MB_OK \
-            "You may add C:\smartops-agent to the %PATH% for convenience when issuing local salt commands from the command line." \
+            "You may add C:\clouldops-agent to the %PATH% for convenience when issuing local salt commands from the command line." \
             /SD IDOK
         Goto done
 
@@ -895,7 +895,7 @@ Var lst_check
 Function updateMinionConfig
 
     ClearErrors
-    FileOpen $0 "$INSTDIR\conf\smartops.yaml" "r"       # open target file for reading
+    FileOpen $0 "$INSTDIR\conf\cloudops.yaml" "r"       # open target file for reading
     GetTempFileName $R0                                 # get new temp file name
     FileOpen $1 $R0 "w"                                 # open temp file for writing
 
@@ -997,8 +997,8 @@ Function updateMinionConfig
 
     FileClose $0                                        # close target file
     FileClose $1                                        # close temp file
-    Delete "$INSTDIR\conf\smartops.yaml"                       # delete target file
-    CopyFiles /SILENT $R0 "$INSTDIR\conf\smartops.yaml"        # copy temp file to target file
+    Delete "$INSTDIR\conf\cloudops.yaml"                       # delete target file
+    CopyFiles /SILENT $R0 "$INSTDIR\conf\cloudops.yaml"        # copy temp file to target file
     Delete $R0                                          # delete temp file
 
 FunctionEnd
@@ -1023,7 +1023,7 @@ Function parseCommandLineSwitches
         ${EndIf}
         FileWrite $0 "$\n"
         FileWrite $0 "$\n"
-        FileWrite $0 "Help for Smartops Agent installation$\n"
+        FileWrite $0 "Help for CloudOps Agent installation$\n"
         FileWrite $0 "===============================================================================$\n"
         FileWrite $0 "$\n"
         FileWrite $0 "/endpoint=$\t$\tA string value to set the endpoint. $\n"

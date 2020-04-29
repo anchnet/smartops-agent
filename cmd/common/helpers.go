@@ -21,7 +21,7 @@ func SetupConfig(confFilePath string) error {
 	// load the configuration
 	err := config.Load(config.SmartOps)
 	if err != nil {
-		return fmt.Errorf("unable to load SmartOps config file: %s", err)
+		return fmt.Errorf("unable to load CloudOps config file: %s", err)
 	}
 	return nil
 }
