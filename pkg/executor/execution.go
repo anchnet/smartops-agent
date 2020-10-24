@@ -71,11 +71,16 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 	for {
 		//n, err := reader.Read(buf[:])
 		buffers, _, err := buffer.ReadLine()
-
 		if runtime.GOOS == "windows" {
 			buffers, _ = GbkToUtf8(buffers)
 		}
 		if err != nil {
+			//if return is.EOF and count =0, then maybe we are running a eary and quick command
+			//then in this time this command has completed, we should return STD_SUCCESS
+			if err == io.EOF && count == 0 {
+				sendCommandLineMessage(STD_SUCCESS, task, nil, sender)
+			}
+
 			// Read returns io.EOF at the end of file, which is not an error for us
 			if err == io.EOF {
 				err = nil
@@ -105,6 +110,7 @@ func GbkToUtf8(s []byte) ([]byte, error) {
 	}
 	return d, nil
 }
+
 func sendCommandLineMessage(code int, task packet.Task, buffers []byte, sender func(packet packet.Packet)) {
 	switch code {
 	case STD_READ:

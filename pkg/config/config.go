@@ -5,7 +5,8 @@ import (
 	"strings"
 )
 
-const defaultSite = "localhost"
+//const defaultSite = "localhost"
+const defaultSite = "smartopsapi.tstack.com"
 
 var overrideVars = map[string]interface{}{}
 
@@ -32,7 +33,8 @@ func init() {
 // initConfig initializes the config defaults on a config
 func initConfig(config Config) {
 	// Agent
-	config.SetDefault("site", defaultSite)
+	//config.SetDefault("site", defaultSite)
+	config.SetDefault("site", nil)
 	config.BindEnvAndSetDefault("endpoint", nil)
 	config.BindEnvAndSetDefault("api_key", nil)
 

@@ -19,7 +19,8 @@ const (
 
 func ValidateAPIKey() error {
 	site := config.SmartOps.GetString("site")
-	url := fmt.Sprintf("https://%s%s", site, apiKeyValidateEndpoint)
+	url := fmt.Sprintf("http://%s%s", site, apiKeyValidateEndpoint)
+	//url := fmt.Sprintf("https://%s%s", site, apiKeyValidateEndpoint)
 	reqBody, err := json.Marshal(packet.NewAPIKeyPacket())
 	if err != nil {
 		return err
@@ -46,7 +47,8 @@ func ValidateAPIKey() error {
 
 func UpsertPlugins(pluginCategory string, isExist bool) error {
 	site := config.SmartOps.GetString("site")
-	url := fmt.Sprintf("https://%s%s", site, pluginsUpdate)
+	url := fmt.Sprintf("http://%s%s", site, pluginsUpdate)
+	//url := fmt.Sprintf("https://%s%s", site, pluginsUpdate)
 	request, err := json.Marshal(packet.InitPluginPacket(pluginCategory, isExist))
 	if err != nil {
 		return err
