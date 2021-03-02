@@ -45,7 +45,12 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	var errStdout, errStderr error
 	stdoutIn, _ := cmd.StdoutPipe()
 	stderrIn, _ := cmd.StderrPipe()
+
 	cmd.Start()
+
+	//if err := cmd.Start(); err != nil{
+	//	fmt.Printf("err is ", err)
+	//}
 	go func() {
 		errStdout = stdRead(stdoutIn, STD_READ, task, sendMessage)
 	}()
@@ -58,6 +63,7 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 		fmt.Println("err")
 	}
 	if errStdout != nil || errStderr != nil {
+		fmt.Printf("errStdout is %s , errStderr is %s \n", errStdout, errStderr)
 		//log.Fatalf("failed to capture stdout or stderr\n")
 		fmt.Println("read and write error")
 	}
@@ -71,13 +77,14 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 	for {
 		//n, err := reader.Read(buf[:])
 		buffers, _, err := buffer.ReadLine()
+		//fmt.Printf("code is : %d , count is %d buffers is %s err is %s \n", code, count, string(buffers), err)
 		if runtime.GOOS == "windows" {
 			buffers, _ = GbkToUtf8(buffers)
 		}
 		if err != nil {
 			//if return is.EOF and count =0, then maybe we are running a eary and quick command
 			//then in this time this command has completed, we should return STD_SUCCESS
-			if err == io.EOF && count == 0 {
+			if err == io.EOF && count == 0 && code == STD_READ {
 				sendCommandLineMessage(STD_SUCCESS, task, nil, sender)
 			}
 
