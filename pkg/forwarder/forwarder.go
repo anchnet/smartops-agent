@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sync"
+	"time"
+
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/executor"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	log "github.com/cihub/seelog"
 	"github.com/gorilla/websocket"
-	"sync"
-	"time"
 )
 
 const (
@@ -50,8 +51,8 @@ type defaultForwarder struct {
 }
 
 func newDefaultForwarder() *defaultForwarder {
-	wsAddr := fmt.Sprintf("ws://%s/transfer/ws", config.SmartOps.GetString("site"))
-	//wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
+	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", config.SmartOps.GetString("site"))
+	wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
 	return &defaultForwarder{
 		wsAddr: wsAddr,
 		apiKey: config.SmartOps.GetString("api_key"),
@@ -145,6 +146,16 @@ func (f *defaultForwarder) sendMessage(p packet.Packet) error {
 	return nil
 }
 
+//reconnectFall 维持reconnect不阻塞且有一个数据
+func (f *defaultForwarder) reconnectFall() {
+	select {
+	case <-f.reconnect:
+		f.reconnect <- true
+	default:
+		f.reconnect <- true
+	}
+}
+
 func (f *defaultForwarder) sendingLoop() {
 	log.Info("Waiting for message to send...")
 	defer close(f.stopped)
@@ -156,7 +167,7 @@ func (f *defaultForwarder) sendingLoop() {
 			if err != nil {
 				_ = log.Errorf("connecting error, %v", err)
 				time.Sleep(5 * time.Second)
-				f.reconnect <- true
+				f.reconnectFall()
 			} else {
 				f.retryCount = 0
 			}
@@ -165,7 +176,7 @@ func (f *defaultForwarder) sendingLoop() {
 				if err := f.sendMessage(pack); err != nil {
 					f.connected = false
 					_ = log.Errorf("sending '%s' message error: %v", pack.Type, err)
-					f.reconnect <- true
+					f.reconnectFall()
 				}
 			}
 		case <-f.stop:
