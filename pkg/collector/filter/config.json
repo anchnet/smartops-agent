@@ -1,0 +1,8 @@
+{
+    "cpu": ["system.cpu.idle"],
+    "proc":[],
+    "mem":[],
+    "disk":["system.disk.free"],
+    "mysql":[],
+    "nginx":[]
+}
