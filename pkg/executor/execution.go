@@ -63,8 +63,7 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 		fmt.Println("err")
 	}
 	if errStdout != nil || errStderr != nil {
-		fmt.Printf("errStdout is %s , errStderr is %s \n", errStdout, errStderr)
-		//log.Fatalf("failed to capture stdout or stderr\n")
+		//log.Errorf("errStdout is %s , errStderr is %s \n", errStdout, errStderr)
 		fmt.Println("read and write error")
 	}
 }
@@ -77,7 +76,11 @@ func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet pa
 	for {
 		//n, err := reader.Read(buf[:])
 		buffers, _, err := buffer.ReadLine()
-		//fmt.Printf("code is : %d , count is %d buffers is %s err is %s \n", code, count, string(buffers), err)
+
+		//if err != nil && err != io.EOF{
+		//	log.Infof("code is : %d , count is %d buffers is %s err is %s \n", code, count, string(buffers), err)
+		//}
+
 		if runtime.GOOS == "windows" {
 			buffers, _ = GbkToUtf8(buffers)
 		}
