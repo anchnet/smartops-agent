@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/packet"
+	log "github.com/cihub/seelog"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 	"io"
@@ -63,7 +64,10 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 		fmt.Println("err")
 	}
 	if errStdout != nil || errStderr != nil {
-		//log.Errorf("errStdout is %s , errStderr is %s \n", errStdout, errStderr)
+		log.Errorf("errStdout is %s , errStderr is %s \n", errStdout, errStderr)
+		//when error happend send task failed message to transfer
+		sendCommandLineMessage(STD_ERR, task, nil, sendMessage)
+		//log.Fatalf("failed to capture stdout or stderr\n")
 		fmt.Println("read and write error")
 	}
 }
