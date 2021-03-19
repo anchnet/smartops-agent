@@ -3,14 +3,19 @@ package executor
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
-	"github.com/anchnet/smartops-agent/pkg/packet"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 	"io"
 	"io/ioutil"
 	"os/exec"
 	"runtime"
+	"strings"
+	"sync"
+
+	"github.com/anchnet/smartops-agent/pkg/packet"
+	"github.com/cihub/seelog"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 const (
@@ -45,22 +50,94 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 	var errStdout, errStderr error
 	stdoutIn, _ := cmd.StdoutPipe()
 	stderrIn, _ := cmd.StderrPipe()
-	cmd.Start()
-	go func() {
-		errStdout = stdRead(stdoutIn, STD_READ, task, sendMessage)
-	}()
-	go func() {
-		errStderr = stdRead(stderrIn, STD_ERR, task, sendMessage)
-	}()
-	err := cmd.Wait()
+	err := cmd.Start()
 	if err != nil {
-		//log.Fatalf("cmd.Run() failed with %s\n", err)
-		fmt.Println("err")
+		sendSuccess(task, FormatOutput(task.ResourceName, err.Error()), sendMessage)
+		return
 	}
-	if errStdout != nil || errStderr != nil {
-		//log.Fatalf("failed to capture stdout or stderr\n")
-		fmt.Println("read and write error")
+	err = stdReadOnce(stdoutIn, stderrIn, task, sendMessage)
+	if err != nil {
+		sendSuccess(task, FormatOutput(task.ResourceName, err.Error()), sendMessage)
+		return
 	}
+	err = cmd.Wait()
+	if err != nil {
+		seelog.Infof("err: %s", err)
+	}
+	if errStdout != nil {
+		seelog.Infof("errStdout : ", errStdout)
+	}
+	if errStderr != nil {
+		seelog.Infof("errStderr: ", errStderr)
+	}
+}
+
+//stdReadOnce  stdReadOnce read pipe stdout and stderr, gather the  message and send.
+func stdReadOnce(stdout io.Reader, stderr io.Reader, task packet.Task, sender func(packet packet.Packet)) error {
+	stdourBuffer := make([]byte, 4*1024)
+	stdErrBuffer := make([]byte, 4*1024)
+	var stdourErr, stdErrErr error
+	var sendStr string
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		buffer := bufio.NewReader(stdout)
+		var count int
+		count, stdourErr = buffer.Read(stdourBuffer)
+		seelog.Infof("Stdout read finish: count：%d", count)
+	}()
+	go func() {
+		defer wg.Done()
+		buffer := bufio.NewReader(stderr)
+		var count int
+		count, stdErrErr = buffer.Read(stdErrBuffer)
+		seelog.Infof("Stderr read finish: count：%d", count)
+	}()
+	wg.Wait()
+	//
+	if stdourErr == io.EOF && stdErrErr == io.EOF {
+		// FormatOutput(task.ResourceName, "SUCCESS")
+		sendSuccess(task, "", sender)
+		return nil
+	}
+
+	if stdourErr != nil && stdourErr != io.EOF {
+		return errors.New(fmt.Sprintf("Read stdout pipe error : %s", stdourErr))
+	} else {
+		if stdourErr != io.EOF {
+			sendStr = sendStr + formatOutputGather(task.ResourceName, stdourBuffer)
+		}
+	}
+
+	if stdErrErr != nil && stdErrErr != io.EOF {
+		return errors.New(fmt.Sprintf("Read stderr pipe error : %s", stdErrErr))
+	} else {
+		if stdErrErr != io.EOF {
+			sendStr = sendStr + formatOutputGather(task.ResourceName, stdErrBuffer)
+		}
+	}
+	sendSuccess(task, sendStr, sender)
+	return nil
+}
+
+func formatOutputGather(resourceName string, elems []byte) string {
+	arrElems := bytes.Split(elems, []byte("\n"))
+	strs := make([]string, 0)
+	for _, val := range arrElems {
+		strs = append(strs, FormatOutput(resourceName, string(val)))
+	}
+	str := strings.Join(strs, "<br>")
+	return str
+}
+
+func sendSuccess(task packet.Task, str string, sender func(packet packet.Packet)) {
+	seelog.Infof("Send to server,  task: %v ， str： %s", task, str)
+	sender(packet.NewTaskResultPacket(packet.TaskResult{
+		TaskId:    task.Id,
+		Output:    str,
+		Completed: true,
+	}))
 }
 
 func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet packet.Packet)) error {
@@ -112,6 +189,7 @@ func GbkToUtf8(s []byte) ([]byte, error) {
 }
 
 func sendCommandLineMessage(code int, task packet.Task, buffers []byte, sender func(packet packet.Packet)) {
+	seelog.Infof("Send to server,  code: %d , return result: %s.", code, string(buffers))
 	switch code {
 	case STD_READ:
 		sender(packet.NewTaskResultPacket(packet.TaskResult{

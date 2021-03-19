@@ -5,16 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/anchnet/smartops-agent/pkg/config"
-	"github.com/anchnet/smartops-agent/pkg/packet"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/anchnet/smartops-agent/pkg/config"
+	"github.com/anchnet/smartops-agent/pkg/packet"
 )
 
 const (
 	apiKeyValidateEndpoint   = "/rundeck/agent/api/validate"
 	agentHealthCheckEndpoint = "/agent/health_check"
 	pluginsUpdate            = "/rundeck/agent/api/create"
+	getMetric                = "/monitor/sws/alert/agent/metric"
 )
 
 func ValidateAPIKey() error {
@@ -69,4 +71,34 @@ func UpsertPlugins(pluginCategory string, isExist bool) error {
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
 	return errors.New(fmt.Sprintf("response code %v, body: %s", resp.StatusCode, string(body)))
+}
+
+func GetFilter() (byts []byte, err error) {
+	site := config.SmartOps.GetString("site")
+	url := fmt.Sprintf("http://%s%s", site, getMetric)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, errors.New("Call get metric status not 200.")
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.New("Ioutil read Error")
+	}
+	bodyM := make(map[string]interface{})
+	err = json.Unmarshal(body, &bodyM)
+	if err != nil {
+		return nil, errors.New("Josn Unmarshal Error")
+	}
+	return json.Marshal(bodyM["data"])
 }
