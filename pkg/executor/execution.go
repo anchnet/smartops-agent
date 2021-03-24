@@ -83,6 +83,7 @@ func stdReadOnce(stdout io.Reader, stderr io.Reader, task packet.Task, sender fu
 	go func() {
 		defer wg.Done()
 		buffer := bufio.NewReader(stdout)
+		cmd.Process.Wait()
 		var count int
 		count, stdourErr = buffer.Read(stdourBuffer)
 		seelog.Infof("Stdout read finish: count：%d", count)
@@ -90,6 +91,7 @@ func stdReadOnce(stdout io.Reader, stderr io.Reader, task packet.Task, sender fu
 	go func() {
 		defer wg.Done()
 		buffer := bufio.NewReader(stderr)
+		cmd.Process.Wait()
 		var count int
 		count, stdErrErr = buffer.Read(stdErrBuffer)
 		seelog.Infof("Stderr read finish: count：%d", count)
@@ -132,6 +134,7 @@ func formatOutputGather(resourceName string, elems []byte) string {
 }
 
 func sendSuccess(task packet.Task, str string, sender func(packet packet.Packet)) {
+	str += fmt.Sprintf("<br>%s", FormatOutput(task.ResourceName, "SUCCESS"))
 	seelog.Infof("Send to server,  task: %v ， str： %s", task, str)
 	sender(packet.NewTaskResultPacket(packet.TaskResult{
 		TaskId:    task.Id,
