@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/anchnet/smartops-agent/pkg/config"
+	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 )
 
@@ -17,6 +18,7 @@ const (
 	agentHealthCheckEndpoint = "/agent/health_check"
 	pluginsUpdate            = "/rundeck/agent/api/create"
 	getMetric                = "/monitor/sws/alert/agent/metric"
+	localMetric              = "/localmetric"
 )
 
 func ValidateAPIKey() error {
@@ -101,4 +103,30 @@ func GetFilter() (byts []byte, err error) {
 		return nil, errors.New("Josn Unmarshal Error")
 	}
 	return json.Marshal(bodyM["data"])
+}
+
+func LocalMetric(reqByts []byte) (byts []byte, err error) {
+
+	url := fmt.Sprintf("http://%s%s", forwarder.LocalMetricListen, forwarder.LocalMetricHandle)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqByts))
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, errors.New("Call local metric  server status not 200.")
+	}
+
+	byts, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.New("Ioutil read Error")
+	}
+	return
 }
