@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/anchnet/smartops-agent/pkg/executor"
 	"github.com/anchnet/smartops-agent/pkg/http"
 	"github.com/spf13/cobra"
 )
@@ -20,18 +21,12 @@ var (
 	outputFlagID string
 )
 
-type OutputFmt struct {
-	ID      string `json:"id"`
-	Message string `json:"message"`
-	Type    string `json:"type"`
-}
-
 func output(cmd *cobra.Command, args []string) error {
 	if runtime.GOOS == "windows" {
 		return fmt.Errorf("unsupported operator system %v", runtime.GOOS)
 	}
 
-	opf := OutputFmt{
+	opf := executor.CustomMonitorCmdRet{
 		ID:      outputFlagID,
 		Type:    outputFlagT,
 		Message: strings.Join(args, ""),
@@ -51,7 +46,7 @@ func output(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	outputCmd.Flags().StringVarP(&outputFlagT, "type", "t", "s", "type s/n.  s: string, n: num")
+	outputCmd.Flags().StringVarP(&outputFlagT, "type", "t", "", "type s/n.  s: string, n: num")
 	outputCmd.Flags().StringVarP(&outputFlagID, "id", "", "", "id")
 	Command.AddCommand(outputCmd)
 }

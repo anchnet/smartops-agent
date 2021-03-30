@@ -1,10 +1,11 @@
 package packet
 
 import (
+	"time"
+
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"github.com/anchnet/smartops-agent/pkg/util"
-	"time"
 )
 
 type Packet struct {
@@ -65,6 +66,15 @@ func NewServerPacket(data []metric.MetricSample) Packet {
 	return Packet{
 		Endpoint: config.SmartOps.GetString("endpoint") + "_server",
 		Type:     "monitor",
+		Data:     data,
+		Time:     time.Now(),
+	}
+}
+
+func NewServerCustomPacket(id string, data interface{}) Packet {
+	return Packet{
+		Endpoint: id,
+		Type:     "custom_monitor",
 		Data:     data,
 		Time:     time.Now(),
 	}

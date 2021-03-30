@@ -131,7 +131,6 @@ func startAgent() error {
 		}
 	}
 	// setup filter
-	//FIXME:
 	// data := []byte(`{
 	// 	"cpu": ["system.cpu.idle","system.cpu.used","system.cpu.system","system.cpu.iowait"],
 	// 	"proc":["system.proc.cpu.usage","system.proc.cpu.system","system.proc.mem.rss","system.proc.thread.count","system.proc.mem.vms","system.proc.mem.pct"],
@@ -139,6 +138,9 @@ func startAgent() error {
 	// 	"disk":["system.disk.total", "system.disk.used","system.disk.free","system.disk.used.pct"]
 	// }`)
 	byts, err := http.GetFilter()
+	//FIXME:
+	byts = []byte(`{
+	}`)
 	seelog.Info("Filter data: ", string(byts))
 	if err != nil {
 		return seelog.Error(err)

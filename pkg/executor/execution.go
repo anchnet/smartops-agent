@@ -23,6 +23,8 @@ const (
 	STD_ERR     = 1
 	STD_SUCCESS = 2
 	//STD_FAIL    = 3
+
+	ExecCustomMonitor = "custom_monitor"
 )
 
 var commandName = "/bin/bash"
@@ -42,6 +44,12 @@ func execCommand(params string, task packet.Task, action string, sendMessage fun
 		}
 		if action == "script" {
 			cmd = exec.Command(commandName, params)
+			//custom monitor
+			if task.Type == ExecCustomMonitor {
+				go routineManage.Go(params, task)
+				sendSuccess(task, FormatOutput(task.ResourceName, "执行完成"), sendMessage)
+				return
+			}
 		}
 	} else {
 		cmd = exec.Command(powershell, params)
@@ -135,12 +143,17 @@ func formatOutputGather(resourceName string, elems []byte) string {
 
 func sendSuccess(task packet.Task, str string, sender func(packet packet.Packet)) {
 	str += fmt.Sprintf("<br>%s", FormatOutput(task.ResourceName, "SUCCESS"))
-	seelog.Infof("Send to server,  task: %v ， str： %s", task, str)
+	seelog.Infof("Send to server,  task: %v ， str： %s", task.Id, str)
 	sender(packet.NewTaskResultPacket(packet.TaskResult{
 		TaskId:    task.Id,
 		Output:    str,
 		Completed: true,
 	}))
+}
+
+func sendCustomSuccess(id string, data interface{}, sender func(packet packet.Packet)) {
+	seelog.Infof("Send to server,  task id: %v ， str： %s", id, data)
+	sender(packet.NewServerCustomPacket(id, data))
 }
 
 func stdRead(reader io.Reader, code int, task packet.Task, sender func(packet packet.Packet)) error {

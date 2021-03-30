@@ -1,10 +1,10 @@
 package forwarder
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/anchnet/smartops-agent/pkg/executor"
 	"github.com/cihub/seelog"
 )
 
@@ -13,17 +13,18 @@ const (
 	LocalMetricHandle string = "/localmetric"
 )
 
-func StartLocalHttp() {
-	http.HandleFunc(LocalMetricHandle, indexHandler)
+func (f *defaultForwarder) StartLocalHttp() {
+	http.HandleFunc(LocalMetricHandle, f.indexHandler)
 	http.ListenAndServe(LocalMetricListen, nil)
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func (f *defaultForwarder) indexHandler(w http.ResponseWriter, r *http.Request) {
 	byts, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		seelog.Error("Http server get body error: ", err)
 		return
 	}
 	defer r.Body.Close()
-	fmt.Println("---------->", string(byts))
+	rm := executor.GetRoutineManage()
+	rm.Send(byts)
 }

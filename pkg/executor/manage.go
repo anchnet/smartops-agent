@@ -27,12 +27,30 @@ import (
 // 	routineManage.Stop("ddddd")
 // }()
 
+var routineManage *RoutineManage
+
+func Init(sender func(packet packet.Packet)) {
+	routineManage = NewRoutineManage("", sender)
+	routineManage.Init()
+}
+
+func GetRoutineManage() *RoutineManage {
+	return routineManage
+}
+
+type CustomMonitorCmdRet struct {
+	ID      string `json:"id"`
+	Message string `json:"message"`
+	Type    string `json:"type"`
+}
 type ManageTask struct {
-	Task      packet.Task
-	CtxCancel context.Context
-	PID       int
-	Params    string
-	Cmd       *exec.Cmd
+	Task           packet.Task
+	CtxCancel      context.Context
+	PID            int
+	Params         string
+	Cmd            *exec.Cmd
+	LatestSendTime time.Time
+	IsFinish       bool
 }
 
 type RoutineManage struct {
@@ -82,7 +100,9 @@ func (r *RoutineManage) Init() error {
 
 	//Start stopped task.
 	for _, taskMng := range r.TaskMap {
-		go r.Go(taskMng.Params, taskMng.Task)
+		if !taskMng.IsFinish {
+			go r.Go(taskMng.Params, taskMng.Task)
+		}
 	}
 
 	return nil
@@ -91,6 +111,7 @@ func (r *RoutineManage) Init() error {
 //Go start task .
 func (r *RoutineManage) Go(params string, task packet.Task) {
 	seelog.Infof("start run task id: %s, params: %s", task.Id, params)
+
 	mngTask := ManageTask{}
 	cmd = exec.Command(commandName, params)
 
@@ -105,6 +126,7 @@ func (r *RoutineManage) Go(params string, task packet.Task) {
 		mngTask.Params = params
 		mngTask.Cmd = cmd
 		mngTask.Task = task
+		mngTask.LatestSendTime = time.Now()
 	}
 
 	r.SetTaskMap(task.Id, mngTask)
@@ -116,7 +138,10 @@ func (r *RoutineManage) Go(params string, task packet.Task) {
 
 	//remote task
 	seelog.Infof("Custom task end %s: ", task.Id)
-	delete(r.TaskMap, task.Id)
+
+	// delete(r.TaskMap, task.Id)
+	mngTask.IsFinish = true
+	r.SetTaskMap(task.Id, mngTask)
 }
 
 //Stop task with task id .
@@ -132,6 +157,8 @@ func (r *RoutineManage) Stop(id string) {
 		seelog.Error("Stop task error! ", err)
 		return
 	}
+	mngTask.IsFinish = true
+	r.SetTaskMap(mngTask.Task.Id, mngTask)
 }
 
 //Snap store data into local file
@@ -162,4 +189,31 @@ func (r *RoutineManage) Reload() error {
 
 	json.Unmarshal(byteValue, &r.TaskMap)
 	return nil
+}
+
+//Send data to websocket
+func (r *RoutineManage) Send(byts []byte) (err error) {
+	sendStr := string(byts)
+	cmdret := CustomMonitorCmdRet{}
+	err = json.Unmarshal(byts, &cmdret)
+	if err != nil {
+		seelog.Errorf("Custom task not convert struct : %s", err)
+		return
+	}
+
+	localTask, ok := r.TaskMap[cmdret.ID]
+	if ok {
+		if localTask.LatestSendTime.After(time.Now().Add(time.Second * -7)) {
+			seelog.Debugf("Custom task send too fast: %v", localTask.Task.Id)
+			return
+		}
+		seelog.Debugf("Custom task send id: %v", localTask.Task.Id)
+		localTask.LatestSendTime = time.Now()
+		r.SetTaskMap(cmdret.ID, localTask)
+		sendCustomSuccess(localTask.Task.Id, sendStr, r.Sender)
+		return
+	}
+	seelog.Debug("Custom task run with cmd. %s", localTask.Task.Id)
+	sendCustomSuccess(localTask.Task.Id, sendStr, r.Sender)
+	return
 }
