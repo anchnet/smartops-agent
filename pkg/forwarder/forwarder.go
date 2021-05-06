@@ -52,8 +52,8 @@ type defaultForwarder struct {
 
 func newDefaultForwarder() *defaultForwarder {
 	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", config.SmartOps.GetString("site"))
-	wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
-	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", "localhost:8080")
+	// wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
+	wsAddr := fmt.Sprintf("ws://%s/transfer/ws", "localhost:8080")
 	return &defaultForwarder{
 		wsAddr: wsAddr,
 		apiKey: config.SmartOps.GetString("api_key"),
@@ -112,6 +112,7 @@ func (f *defaultForwarder) Start() error {
 	f.state = STARTED
 	executor.Init(forwarderInstance.SendMessage)
 	go f.receiveLoop()
+	log.Info("Start local metric http server.")
 	go f.StartLocalHttp()
 	f.healthChecker.Start()
 	go f.sendingLoop()

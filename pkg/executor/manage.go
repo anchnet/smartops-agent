@@ -170,7 +170,7 @@ func (r *RoutineManage) Snap() error {
 	return ioutil.WriteFile(r.SnapFilepath, byts, 0666)
 }
 
-//Reload reload data into local file
+//Reload reload row data from local file
 func (r *RoutineManage) Reload() error {
 	jsonFile, err := os.Open(r.SnapFilepath)
 	if os.IsNotExist(err) {

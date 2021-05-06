@@ -138,7 +138,7 @@ func startAgent() error {
 	// 	"disk":["system.disk.total", "system.disk.used","system.disk.free","system.disk.used.pct"]
 	// }`)
 	byts, err := http.GetFilter()
-	//FIXME:
+	// //FIXME:
 	byts = []byte(`{
 	}`)
 	seelog.Info("Filter data: ", string(byts))

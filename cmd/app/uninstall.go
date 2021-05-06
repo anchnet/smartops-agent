@@ -4,13 +4,14 @@ package app
 
 import (
 	"fmt"
+	"os"
+	"runtime"
+	"syscall"
+
 	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/pidfile"
 	"github.com/anchnet/smartops-agent/pkg/util/file"
 	"github.com/spf13/cobra"
-	"os"
-	"runtime"
-	"syscall"
 )
 
 var (

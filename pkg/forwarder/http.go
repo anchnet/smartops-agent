@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	LocalMetricListen string = "127.0.0.1:8899"
+	LocalMetricListen string = "127.0.0.1:48001"
 	LocalMetricHandle string = "/localmetric"
 )
 
