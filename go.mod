@@ -7,6 +7,7 @@ require (
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-sql-driver/mysql v1.4.1
+	github.com/google/gopacket v1.1.19
 	github.com/gorilla/websocket v1.4.0
 	github.com/hashicorp/hcl v1.0.0
 	github.com/json-iterator/go v1.1.7

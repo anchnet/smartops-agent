@@ -130,3 +130,29 @@ func LocalMetric(reqByts []byte) (byts []byte, err error) {
 	}
 	return
 }
+
+func PhysicalDevice(reqByts []byte) (byts []byte, err error) {
+
+	url := fmt.Sprintf("http://%s%s", forwarder.LocalMetricListen, forwarder.PhysicalDeviceHandle)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqByts))
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, errors.New("Call local metric  server status not 200.")
+	}
+
+	byts, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.New("Ioutil read Error")
+	}
+	return
+}
