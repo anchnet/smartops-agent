@@ -2,11 +2,12 @@ package system
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	log "github.com/cihub/seelog"
 	"github.com/shirou/gopsutil/disk"
-	"time"
 )
 
 type DiskCheck struct {

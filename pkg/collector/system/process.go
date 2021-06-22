@@ -2,16 +2,18 @@ package system
 
 import (
 	"fmt"
+
 	"github.com/DataDog/gopsutil/cpu"
 	"github.com/DataDog/gopsutil/process"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 
 	//"github.com/anchnet/smartops-agent/pkg/collector/core"
-	"github.com/anchnet/smartops-agent/pkg/metric"
-	"github.com/shirou/gopsutil/mem"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/anchnet/smartops-agent/pkg/metric"
+	"github.com/shirou/gopsutil/mem"
 )
 
 type ProcCheck struct {

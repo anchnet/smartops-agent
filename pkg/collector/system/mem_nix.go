@@ -4,11 +4,12 @@ package system
 
 import (
 	"fmt"
+	"runtime"
+	"time"
+
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"github.com/shirou/gopsutil/mem"
-	"runtime"
-	"time"
 )
 
 type MemCheck struct {

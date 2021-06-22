@@ -4,10 +4,11 @@ package system
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
 	"github.com/shirou/gopsutil/load"
-	"time"
 )
 
 type LoadCheck struct {
