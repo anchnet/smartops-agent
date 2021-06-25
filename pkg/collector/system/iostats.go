@@ -8,7 +8,7 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/metric"
 
 	log "github.com/cihub/seelog"
-	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/v3/disk"
 )
 
 type IOStatsCheck struct {

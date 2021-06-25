@@ -3,7 +3,6 @@ module github.com/anchnet/smartops-agent
 go 1.12
 
 require (
-	github.com/DataDog/gopsutil v0.0.0-20190604140811-fe7986fb54b7
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-sql-driver/mysql v1.4.1
@@ -15,7 +14,6 @@ require (
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pelletier/go-toml v1.4.0
-	github.com/shirou/gopsutil v0.0.0-20190627142359-4c8b404ee5c5
 	github.com/shirou/gopsutil/v3 v3.21.4
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/cast v1.3.0
