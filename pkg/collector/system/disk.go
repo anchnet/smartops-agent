@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
@@ -29,6 +30,11 @@ func (c *DiskCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 }
 
 func (c DiskCheck) exclude(disk disk.PartitionStat) bool {
+	hasPre := strings.HasPrefix(disk.Device, "/dev/")
+	if !hasPre {
+		return true
+	}
+
 	switch disk.Fstype {
 	case "devfs",
 		"devtmpfs",
@@ -61,7 +67,7 @@ func (c DiskCheck) collectPartitionMetrics(partitions []disk.PartitionStat, time
 
 		tag["filesystem"] = partition.Fstype
 		tag["mountpoint"] = partition.Mountpoint
-
+		fmt.Println(partition)
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("total"), float64(usage.Total), metric.UnitByte, time, tag))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used"), float64(usage.Used), metric.UnitByte, time, tag))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("free"), float64(usage.Free), metric.UnitByte, time, tag))

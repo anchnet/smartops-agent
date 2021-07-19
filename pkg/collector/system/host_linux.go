@@ -80,12 +80,12 @@ func (c *AlarmCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 }
 
 func (c AlarmCheck) formatMetric(name string) string {
-	format := "system.alarm.%s"
+	format := "system.host.%s"
 	return fmt.Sprintf(format, name)
 }
 
 func init() {
 	core.RegisterCheck(&AlarmCheck{
-		name: "alarm",
+		name: "host",
 	})
 }

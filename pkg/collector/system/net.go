@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
@@ -94,6 +95,11 @@ func (c *NetCheck) exclude(stat net.IOCountersStat) bool {
 					return true
 				}
 			}
+		}
+		pre1 := strings.HasPrefix(i.Name, "eth")
+		pre2 := strings.HasPrefix(i.Name, "enp")
+		if !pre1 && !pre2 {
+			return true
 		}
 	}
 	return false
