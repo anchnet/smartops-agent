@@ -53,6 +53,7 @@ type defaultForwarder struct {
 func newDefaultForwarder() *defaultForwarder {
 	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", config.SmartOps.GetString("site"))
 	wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
+	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", "localhost:9900")
 	return &defaultForwarder{
 		wsAddr: wsAddr,
 		apiKey: config.SmartOps.GetString("api_key"),
@@ -109,8 +110,10 @@ func (f *defaultForwarder) Start() error {
 		return log.Errorf("connect to server error: %v", err)
 	}
 	f.state = STARTED
-
+	executor.Init(forwarderInstance.SendMessage)
 	go f.receiveLoop()
+	log.Info("Start local metric http server.")
+	go f.StartLocalHttp()
 	f.healthChecker.Start()
 	go f.sendingLoop()
 	return nil
@@ -229,6 +232,8 @@ func (f *defaultForwarder) receiveLoop() {
 				case execJobRunScript:
 					go executor.RunScript(task, f.SendMessage)
 				case execJobSchedule:
+					go executor.RunScript(task, f.SendMessage)
+				case executor.ExecCustomMonitor:
 					go executor.RunScript(task, f.SendMessage)
 				}
 			}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
-	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/v3/mem"
 	"time"
 )
 
