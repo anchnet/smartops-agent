@@ -7,6 +7,7 @@ import (
 const (
 	UnitPercent   = "%"
 	UnitByte      = "byte"
+	UnitGe        = "个"
 	BytePerSecond = "byte/s"
 	Conn          = "conn"
 	ReqPerSecond  = "req/s"

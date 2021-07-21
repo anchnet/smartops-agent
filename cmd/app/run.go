@@ -138,14 +138,7 @@ func startAgent() error {
 	// 	"disk":["system.disk.total", "system.disk.used","system.disk.free","system.disk.used.pct"],
 	//	"alarm": ["system.alarm.info","system.alarm.user_count"]
 	// }`)
-	// byts, err := http.GetFilter()
-	// //FIXME:
-	byts := []byte(`{
-		"alarm": ["system.alarm.info","system.alarm.user_count"],
-			"cpu": ["system.cpu.idle","system.cpu.used","system.cpu.system","system.cpu.iowait"],
-			"mem":["system.mem.committed_as","system.mem.commit_limit","system.mem.page_tables","system.mem.slab","system.mem.shared","system.mem.buffered","system.mem.total","system.mem.free","system.mem.used","system.mem.used_pct", "system.mem.cached"],
-			"disk":["system.disk.total", "system.disk.used","system.disk.free","system.disk.used.pct"]
-	}`)
+	byts, err := http.GetFilter()
 	seelog.Info("Filter data: ", string(byts))
 	if err != nil {
 		return seelog.Error(err)

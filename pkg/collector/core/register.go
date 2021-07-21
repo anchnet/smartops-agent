@@ -41,3 +41,8 @@ func GetAllPluginsCheck() []PluginCheck {
 	}
 	return pluginChecks
 }
+
+func GetCheck(name string) (Check, bool) {
+	check, ok := catalog[name]
+	return check, ok
+}

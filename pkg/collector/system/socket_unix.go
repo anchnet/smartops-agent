@@ -18,7 +18,7 @@ type SocketCheck struct {
 }
 
 func (c *SocketCheck) Name() string {
-	return "socket"
+	return "tcp"
 }
 
 func (c *SocketCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
@@ -71,17 +71,17 @@ func (c SocketCheck) getTCPNum() (total float64) {
 func (c SocketCheck) collectPartitionMetrics(time time.Time) []metric.MetricSample {
 	var samples []metric.MetricSample
 	num := c.getTCPNum()
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("tcp.count"), num, metric.Conn, time, nil))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("connection_count"), num, metric.UnitGe, time, nil))
 	return samples
 }
 
 func (c SocketCheck) formatMetric(name string) string {
-	format := "system.socket.%s"
+	format := "system.tcp.%s"
 	return fmt.Sprintf(format, name)
 }
 
 func init() {
 	core.RegisterCheck(&SocketCheck{
-		name: "socket",
+		name: "tcp",
 	})
 }

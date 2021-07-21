@@ -26,6 +26,16 @@ func (c *DiskCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 		return nil, err
 	}
 	samples = append(samples, c.collectPartitionMetrics(partitions, t)...)
+
+	check, ok := core.GetCheck("iostats")
+	if ok {
+		ms, err := check.Collect(t)
+		if err != nil {
+			return nil, err
+		}
+		samples = append(samples, ms...)
+	}
+
 	return samples, nil
 }
 
@@ -67,7 +77,6 @@ func (c DiskCheck) collectPartitionMetrics(partitions []disk.PartitionStat, time
 
 		tag["filesystem"] = partition.Fstype
 		tag["mountpoint"] = partition.Mountpoint
-		fmt.Println(partition)
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("total"), float64(usage.Total), metric.UnitByte, time, tag))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("used"), float64(usage.Used), metric.UnitByte, time, tag))
 		samples = append(samples, metric.NewServerMetricSample(c.formatMetric("free"), float64(usage.Free), metric.UnitByte, time, tag))

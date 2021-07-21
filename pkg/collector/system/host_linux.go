@@ -45,15 +45,15 @@ import (
 	"github.com/shirou/gopsutil/v3/host"
 )
 
-type AlarmCheck struct {
+type HostCheck struct {
 	name string
 }
 
-func (c *AlarmCheck) Name() string {
-	return "alarm"
+func (c *HostCheck) Name() string {
+	return "host"
 }
 
-func (c *AlarmCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
+func (c *HostCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	var samples []metric.MetricSample
 
 	var argv [10][32]C.char
@@ -74,18 +74,18 @@ func (c *AlarmCheck) Collect(t time.Time) ([]metric.MetricSample, error) {
 	tags["kernelVersion"] = info.KernelVersion
 	tags["version"] = ""
 	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("info"), 0, "", t, tags))
-	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("user_count"), float64(golen), metric.UnitPercent, t, nil))
+	samples = append(samples, metric.NewServerMetricSample(c.formatMetric("user_count"), float64(golen), metric.UnitGe, t, nil))
 
 	return samples, nil
 }
 
-func (c AlarmCheck) formatMetric(name string) string {
+func (c HostCheck) formatMetric(name string) string {
 	format := "system.host.%s"
 	return fmt.Sprintf(format, name)
 }
 
 func init() {
-	core.RegisterCheck(&AlarmCheck{
+	core.RegisterCheck(&HostCheck{
 		name: "host",
 	})
 }

@@ -52,8 +52,8 @@ type defaultForwarder struct {
 
 func newDefaultForwarder() *defaultForwarder {
 	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", config.SmartOps.GetString("site"))
-	// wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
-	wsAddr := fmt.Sprintf("ws://%s/transfer/ws", "localhost:9900")
+	wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
+	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", "localhost:9900")
 	return &defaultForwarder{
 		wsAddr: wsAddr,
 		apiKey: config.SmartOps.GetString("api_key"),

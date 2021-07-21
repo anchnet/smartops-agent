@@ -17,14 +17,14 @@ const (
 	apiKeyValidateEndpoint   = "/rundeck/agent/api/validate"
 	agentHealthCheckEndpoint = "/agent/health_check"
 	pluginsUpdate            = "/rundeck/agent/api/create"
-	getMetric                = "/monitor/sws/alert/agent/metric"
+	getMetric                = "/cmp/sws/alert/agent/metric"
 	localMetric              = "/localmetric"
 )
 
 func ValidateAPIKey() error {
 	site := config.SmartOps.GetString("site")
-	url := fmt.Sprintf("http://%s%s", site, apiKeyValidateEndpoint)
-	//url := fmt.Sprintf("https://%s%s", site, apiKeyValidateEndpoint)
+	// url := fmt.Sprintf("http://%s%s", site, apiKeyValidateEndpoint)
+	url := fmt.Sprintf("https://%s%s", site, apiKeyValidateEndpoint)
 	reqBody, err := json.Marshal(packet.NewAPIKeyPacket())
 	if err != nil {
 		return err
@@ -51,8 +51,8 @@ func ValidateAPIKey() error {
 
 func UpsertPlugins(pluginCategory string, isExist bool) error {
 	site := config.SmartOps.GetString("site")
-	url := fmt.Sprintf("http://%s%s", site, pluginsUpdate)
-	//url := fmt.Sprintf("https://%s%s", site, pluginsUpdate)
+	// url := fmt.Sprintf("http://%s%s", site, pluginsUpdate)
+	url := fmt.Sprintf("https://%s%s", site, pluginsUpdate)
 	request, err := json.Marshal(packet.InitPluginPacket(pluginCategory, isExist))
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func UpsertPlugins(pluginCategory string, isExist bool) error {
 
 func GetFilter() (byts []byte, err error) {
 	site := config.SmartOps.GetString("site")
-	url := fmt.Sprintf("http://%s%s", site, getMetric)
+	url := fmt.Sprintf("https://%s%s", site, getMetric)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
