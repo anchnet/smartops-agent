@@ -1,11 +1,12 @@
 package collector
 
 import (
+	"time"
+
 	"github.com/anchnet/smartops-agent/pkg/collector/plugin"
 	"github.com/anchnet/smartops-agent/pkg/collector/system"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/packet"
-	"time"
 )
 
 var stopCh = make(chan bool, 1)

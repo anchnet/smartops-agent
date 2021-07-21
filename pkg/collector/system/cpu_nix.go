@@ -4,10 +4,11 @@ package system
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/anchnet/smartops-agent/pkg/collector/core"
 	"github.com/anchnet/smartops-agent/pkg/metric"
-	"github.com/shirou/gopsutil/cpu"
-	"time"
+	"github.com/shirou/gopsutil/v3/cpu"
 )
 
 type CPUCheck struct {

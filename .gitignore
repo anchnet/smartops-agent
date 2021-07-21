@@ -20,3 +20,10 @@ var
 /go.sum
 conf/smartops.yaml
 /cmd/cmd
+.vscode
+
+#other
+agent
+snapPath.json
+makefile
+smartops-agent
