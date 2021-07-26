@@ -6,7 +6,7 @@ require (
 	github.com/DataDog/gopsutil v0.0.0-20190604140811-fe7986fb54b7
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
 	github.com/fsnotify/fsnotify v1.4.7
-	github.com/gorilla/websocket v1.4.0
+	github.com/gorilla/websocket v1.4.1
 	github.com/hashicorp/hcl v1.0.0
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 	github.com/magiconair/properties v1.8.1
