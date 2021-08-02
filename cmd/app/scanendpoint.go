@@ -1,4 +1,5 @@
 // +build !windows
+// +build 386
 
 package app
 
