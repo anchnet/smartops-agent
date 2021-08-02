@@ -27,3 +27,7 @@ agent
 snapPath.json
 makefile
 smartops-agent
+
+
+#mac
+.DS_Store
