@@ -1,8 +1,11 @@
+// +build linux, darwin
+
 package util
 
 import (
 	"net"
 	"net/http"
+	"strings"
 )
 
 func CreateHttpTransport() *http.Transport {
@@ -33,14 +36,25 @@ func CreateHttpTransport() *http.Transport {
 
 func LocalIPv4() ([]string, error) {
 	var ips []string
-	addrs, err := net.InterfaceAddrs()
+	interfaces, err := net.Interfaces()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, a := range addrs {
-		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && !ipnet.IP.IsLinkLocalUnicast() && ipnet.IP.To4() != nil {
-			ips = append(ips, ipnet.IP.String())
+	for _, i := range interfaces {
+		pre1 := strings.HasPrefix(i.Name, "eth")
+		pre2 := strings.HasPrefix(i.Name, "enp")
+		if !pre1 && !pre2 {
+			continue
+		}
+		addr, err := i.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, a := range addr {
+			if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && !ipnet.IP.IsLinkLocalUnicast() && ipnet.IP.To4() != nil {
+				ips = append(ips, ipnet.IP.String())
+			}
 		}
 	}
 	return ips, nil
