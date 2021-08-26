@@ -1,4 +1,4 @@
-// +build linux, darwin
+// +build linux darwin
 
 package util
 
@@ -53,9 +53,20 @@ func LocalIPv4() ([]string, error) {
 		}
 		for _, a := range addr {
 			if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && !ipnet.IP.IsLinkLocalUnicast() && ipnet.IP.To4() != nil {
-				ips = append(ips, ipnet.IP.String())
+				if !exclude(ipnet.IP.String()) {
+					ips = append(ips, ipnet.IP.String())
+				}
 			}
 		}
 	}
 	return ips, nil
+}
+
+func exclude(ip string) bool {
+	for _, pre := range FilterFrefixs {
+		if strings.HasPrefix(ip, pre) {
+			return true
+		}
+	}
+	return false
 }

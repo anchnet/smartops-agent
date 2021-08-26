@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/collector"
@@ -14,6 +15,7 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/http"
 	"github.com/anchnet/smartops-agent/pkg/pidfile"
+	"github.com/anchnet/smartops-agent/pkg/util"
 	"github.com/cihub/seelog"
 	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
@@ -152,10 +154,25 @@ func startAgent() error {
 		return log.Errorf("error start forwarder: %v", err)
 	}
 
+	//setup the ip filter
+	go ipfilter()
+
 	// setup the collector
 	go collector.Collect()
 	log.Info("Start running...")
 	return nil
+}
+
+func ipfilter() {
+	ticker := time.NewTicker(30 * time.Minute)
+	for range ticker.C {
+		ipPre, err := http.GetFilerIp()
+		if err != nil {
+			log.Error("Filter ip err ", err)
+		}
+		log.Info("exclude ip prefix: ", ipPre)
+		util.FilterFrefixs = ipPre
+	}
 }
 
 func stopAgent() {

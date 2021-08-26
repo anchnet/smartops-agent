@@ -18,6 +18,7 @@ const (
 	agentHealthCheckEndpoint = "/agent/health_check"
 	pluginsUpdate            = "/rundeck/agent/api/create"
 	getMetric                = "/cmp/sws/alert/agent/metric"
+	getFilter                = "/cmp/sws/alert/agent/filter"
 	localMetric              = "/localmetric"
 )
 
@@ -155,4 +156,45 @@ func PhysicalDevice(reqByts []byte) (byts []byte, err error) {
 		return nil, errors.New("Ioutil read Error")
 	}
 	return
+}
+
+func GetFilerIp() (ipPrefix []string, err error) {
+	site := config.SmartOps.GetString("site")
+	//
+	site = "devapi.smartops.anchnet.com"
+	//
+	url := fmt.Sprintf("https://%s%s", site, getFilter)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, errors.New("Call get metric status not 200.")
+	}
+	bodySt := GetFilerIpBody{}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.New("Ioutil read Error")
+	}
+
+	err = json.Unmarshal(body, &bodySt)
+	if err != nil {
+		return nil, errors.New("Josn Unmarshal Error")
+	}
+
+	return bodySt.Data.SwsIP, nil
+}
+
+type GetFilerIpBody struct {
+	Data struct {
+		SwsIP []string `json:"swsIp"`
+	} `json:"data"`
 }
