@@ -43,7 +43,7 @@ func LocalIPv4() ([]string, error) {
 
 	for _, i := range interfaces {
 		pre1 := strings.HasPrefix(i.Name, "eth")
-		pre2 := strings.HasPrefix(i.Name, "enp")
+		pre2 := strings.HasPrefix(i.Name, "en")
 		if !pre1 && !pre2 {
 			continue
 		}

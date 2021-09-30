@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/anchnet/smartops-agent/cmd/common"
+	"github.com/anchnet/smartops-agent/cmd/update"
 	"github.com/anchnet/smartops-agent/pkg/collector"
 	"github.com/anchnet/smartops-agent/pkg/collector/filter"
 	"github.com/anchnet/smartops-agent/pkg/config"
@@ -45,6 +46,7 @@ func run(cmd *cobra.Command, args []string) error {
 		log.Infof("Receive signal '%s', shutting down...", sig)
 		errorCh <- nil
 	}()
+	go update.AutoUpdate()
 
 	if err := startAgent(); err != nil {
 		return err
@@ -102,12 +104,28 @@ func startAgent() error {
 		}
 	}
 
+	// get server info
+	info, err := http.GetServerInfo()
+	if err != nil {
+		return log.Errorf("getserver info error, %v", err)
+	}
+	log.Infof("server info %v", info)
+	http.SetServerInfoData(info)
+	forwarder.SetWsAddr(info.Transfer.URL)
+
 	// validate api_key
 	err = http.ValidateAPIKey()
 	if err != nil {
 		return log.Errorf("validate api_key error, %v", err)
 	}
 	log.Infof("API key validate success.")
+
+	//sendAgentVersion
+	err = http.SendAgentVersion()
+	if err != nil {
+		return log.Errorf("send agent version error, %v", err)
+	}
+	log.Infof("send agent version success.")
 
 	// init nginx configs
 	if err := common.SetupNgxConfig(common.DefaultNgxConfPath); err != nil {
