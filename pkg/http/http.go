@@ -77,7 +77,7 @@ http:
 
 func ValidateAPIKey() error {
 	url := serverInfoData.ApiKeyValidateEndpoint.URL
-	reqBody, err := json.Marshal(packet.NewAPIKeyPacket())
+	reqBody, err := json.Marshal(packet.NewAPIKeyPacket(serverInfoData.ApiKeyValidateEndpoint.Vendor))
 	if err != nil {
 		return err
 	}
@@ -248,6 +248,7 @@ type ServerInfoData struct {
 	ApiKeyValidateEndpoint struct {
 		URL    string `json:"url"`
 		Method string `json:"method"`
+		Vendor string `json:"vendor"`
 	} `json:"apiKeyValidateEndpoint"`
 	AgentHealthCheckEndpoint struct {
 		URL    string `json:"url"`

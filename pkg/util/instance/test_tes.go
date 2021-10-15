@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	s, err := id.GetInstanceId("tencentyun")
+	s, err := id.GetInstanceId("huaweiyun")
 	fmt.Println(err)
 	fmt.Println(s)
 }
