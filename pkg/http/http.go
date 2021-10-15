@@ -11,6 +11,8 @@ import (
 	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/packet"
+	"github.com/anchnet/smartops-agent/pkg/util/instance/id"
+	"github.com/cihub/seelog"
 )
 
 const (
@@ -77,7 +79,12 @@ http:
 
 func ValidateAPIKey() error {
 	url := serverInfoData.ApiKeyValidateEndpoint.URL
-	reqBody, err := json.Marshal(packet.NewAPIKeyPacket(serverInfoData.ApiKeyValidateEndpoint.Vendor))
+	instanceId, err := id.GetInstanceId(id.Vendor(serverInfoData.ApiKeyValidateEndpoint.Vendor))
+	if err != nil {
+		seelog.Error("get instance id err: ", err)
+		instanceId = ""
+	}
+	reqBody, err := json.Marshal(packet.NewAPIKeyPacket(instanceId))
 	if err != nil {
 		return err
 	}
