@@ -3,10 +3,10 @@ package forwarder
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
+	"github.com/anchnet/smartops-agent/cmd/update"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/executor"
 	"github.com/anchnet/smartops-agent/pkg/packet"
@@ -26,6 +26,7 @@ const (
 	execJobRunScript   = "job_run_script"
 	execJobSchedule    = "job_schedule"
 	execAgentUninstall = "agent_uninstall"
+	execAgentUpdate    = "agent_update"
 
 	AuthType = "auth"
 	TaskType = "task"
@@ -33,6 +34,11 @@ const (
 
 var forwarderInstance *defaultForwarder
 var forwarderInit sync.Once
+var wsAddr string
+
+func SetWsAddr(s string) {
+	wsAddr = s
+}
 
 type defaultForwarder struct {
 	wsAddr        string
@@ -51,9 +57,6 @@ type defaultForwarder struct {
 }
 
 func newDefaultForwarder() *defaultForwarder {
-	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", config.SmartOps.GetString("site"))
-	wsAddr := fmt.Sprintf("wss://%s/transfer/ws", config.SmartOps.GetString("site"))
-	// wsAddr := fmt.Sprintf("ws://%s/transfer/ws", "localhost:9900")
 	return &defaultForwarder{
 		wsAddr: wsAddr,
 		apiKey: config.SmartOps.GetString("api_key"),
@@ -235,6 +238,9 @@ func (f *defaultForwarder) receiveLoop() {
 					go executor.RunScript(task, f.SendMessage)
 				case executor.ExecCustomMonitor:
 					go executor.RunScript(task, f.SendMessage)
+				case execAgentUpdate:
+					go executor.RunScript(task, f.SendMessage)
+					go update.OnceUpdate()
 				}
 			}
 		}

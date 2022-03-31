@@ -5,21 +5,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/anchnet/smartops-agent/cmd/common"
 	"github.com/anchnet/smartops-agent/pkg/executor"
 	"github.com/anchnet/smartops-agent/pkg/packet"
 	"github.com/cihub/seelog"
 )
 
-const (
-	LocalMetricListen    string = "127.0.0.1:48001"
-	LocalMetricHandle    string = "/localmetric"
-	PhysicalDeviceHandle string = "/physical_device"
-)
-
 func (f *defaultForwarder) StartLocalHttp() {
-	http.HandleFunc(LocalMetricHandle, f.indexHandler)
-	http.HandleFunc(PhysicalDeviceHandle, f.physical_device)
-	http.ListenAndServe(LocalMetricListen, nil)
+	http.HandleFunc(common.LocalMetricHandle, f.indexHandler)
+	http.HandleFunc(common.PhysicalDeviceHandle, f.physical_device)
+	http.ListenAndServe(common.LocalMetricListen, nil)
 }
 
 func (f *defaultForwarder) indexHandler(w http.ResponseWriter, r *http.Request) {

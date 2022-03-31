@@ -18,6 +18,7 @@ type Packet struct {
 type APIKey struct {
 	Endpoint string `json:"endpoint"`
 	Token    string `json:"authToken"`
+	Vendor   string `json:"vendor"`
 }
 
 type Plug struct {
@@ -38,10 +39,11 @@ type TaskResult struct {
 	Completed bool   `json:"completed"`
 }
 
-func NewAPIKeyPacket() APIKey {
+func NewAPIKeyPacket(vendor string) APIKey {
 	return APIKey{
 		Endpoint: config.SmartOps.GetString("endpoint"),
 		Token:    config.SmartOps.GetString("api_key"),
+		Vendor:   vendor,
 	}
 }
 func NewHeartbeatPacket() Packet {

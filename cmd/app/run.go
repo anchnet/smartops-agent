@@ -6,14 +6,17 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/anchnet/smartops-agent/cmd/common"
+	"github.com/anchnet/smartops-agent/cmd/update"
 	"github.com/anchnet/smartops-agent/pkg/collector"
 	"github.com/anchnet/smartops-agent/pkg/collector/filter"
 	"github.com/anchnet/smartops-agent/pkg/config"
 	"github.com/anchnet/smartops-agent/pkg/forwarder"
 	"github.com/anchnet/smartops-agent/pkg/http"
 	"github.com/anchnet/smartops-agent/pkg/pidfile"
+	"github.com/anchnet/smartops-agent/pkg/util"
 	"github.com/cihub/seelog"
 	log "github.com/cihub/seelog"
 	"github.com/spf13/cobra"
@@ -43,6 +46,7 @@ func run(cmd *cobra.Command, args []string) error {
 		log.Infof("Receive signal '%s', shutting down...", sig)
 		errorCh <- nil
 	}()
+	go update.AutoUpdate()
 
 	if err := startAgent(); err != nil {
 		return err
@@ -100,12 +104,28 @@ func startAgent() error {
 		}
 	}
 
+	// get server info
+	info, err := http.GetServerInfo()
+	if err != nil {
+		return log.Errorf("getserver info error, %v", err)
+	}
+	log.Infof("server info %v", info)
+	http.SetServerInfoData(info)
+	forwarder.SetWsAddr(info.Transfer.URL)
+
 	// validate api_key
 	err = http.ValidateAPIKey()
 	if err != nil {
 		return log.Errorf("validate api_key error, %v", err)
 	}
 	log.Infof("API key validate success.")
+
+	//sendAgentVersion
+	err = http.SendAgentVersion()
+	if err != nil {
+		return log.Errorf("send agent version error, %v", err)
+	}
+	log.Infof("send agent version success.")
 
 	// init nginx configs
 	if err := common.SetupNgxConfig(common.DefaultNgxConfPath); err != nil {
@@ -152,10 +172,25 @@ func startAgent() error {
 		return log.Errorf("error start forwarder: %v", err)
 	}
 
+	//setup the ip filter
+	go ipfilter()
+
 	// setup the collector
 	go collector.Collect()
 	log.Info("Start running...")
 	return nil
+}
+
+func ipfilter() {
+	ticker := time.NewTicker(30 * time.Minute)
+	for range ticker.C {
+		ipPre, err := http.GetFilerIp()
+		if err != nil {
+			log.Error("Filter ip err ", err)
+		}
+		log.Info("exclude ip prefix: ", ipPre)
+		util.FilterFrefixs = ipPre
+	}
 }
 
 func stopAgent() {

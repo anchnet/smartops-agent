@@ -4,6 +4,10 @@ import (
 	"github.com/anchnet/smartops-agent/pkg/util/executable"
 )
 
+const (
+	Version = "2.0.7"
+)
+
 var (
 	// utility variables
 	_here, _ = executable.Folder()
@@ -29,4 +33,10 @@ const (
 	DefaultPidFile = "var/run/agent.pid"
 	// Cache dir
 	DefaultCacheDir = "var/cache/"
+)
+
+var (
+	LocalMetricListen    string = "127.0.0.1:48001"
+	LocalMetricHandle    string = "/localmetric"
+	PhysicalDeviceHandle string = "/physical_device"
 )
